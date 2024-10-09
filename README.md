@@ -2,7 +2,7 @@
 Social media realtime - Flutter App
 Login: Đăng nhập bằng tài khoản có trên database, đăng nhập bằng google
 Logup: Logup thủ công, logup bằng google
-*Feed: 
+Feed: 
 	+ Đăng bài: thêm ảnh, video, text, loadfile từ điện thoại
 		
 	+ Xóa bài
@@ -11,9 +11,9 @@ Like, comment
 Trang thông báo
 Tìm kiếm bạn bè
 Follow
-* Chat
-Chat 1-1
-Group chat
+ Chat
+ -Chat 1-1
+ -Group chat
 	+ add group chat
 	+ xóa đoạn chat
 	+ thêm đoạn chat mới
