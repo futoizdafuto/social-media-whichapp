@@ -11,13 +11,13 @@
 *Trang thông báo
 *Tìm kiếm bạn bè
 *Follow
- *Chat
-* -Chat 1-1
-* -Group chat
-	*+ add group chat
-	*+ xóa đoạn chat
-	*+ thêm đoạn chat mới
-	*+ gửi ảnh, video
+*Chat
+ -Chat 1-1
+ -Group chat
+  	+ add group chat
+	+ xóa đoạn chat
+	+ thêm đoạn chat mới
+	+ gửi ảnh, video
 *Profile
 	+ Avatar, name , username
 	+ Post đã đăng
