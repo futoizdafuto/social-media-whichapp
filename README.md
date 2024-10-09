@@ -1,25 +1,39 @@
-# Social Media App Flutter UI
+# social-media-whichapp
+*Social media realtime - Flutter App
 
-**Design Credit:** https://www.pixeltrue.com/free-ui-kits/social-media-app
+***Login:** Đăng nhập bằng tài khoản có trên database, đăng nhập bằng google
 
-<p align="center">
-  <img alt="sergey" src="app_preview.gif">
-</p>
+***Logup:** Logup thủ công, logup bằng google
 
-Get started
-===========
-This project is a starting point for a Flutter application.
+***Feed:** 
 
-A few resources to get you started if this is your first Flutter project:
+	*+ Đăng bài: thêm ảnh, video, text, loadfile từ điện thoại	
+	*+ Xóa bài
+	*+ Sửa bài: sửa text
+ 
+***Like, comment**
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+***Trang thông báo**
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+***Tìm kiếm bạn bè**
 
+***Follow**
 
-License
-=======
-Sourcerer is under the MIT license. See the [LICENSE](https://github.com/sourcerer-io/sourcerer-app/blob/develop/LICENSE.md) for more information.
+***Chat**
+ -Chat 1-1
+ 
+ -Group chat
+ 
+  	+ add group chat
+	+ xóa đoạn chat
+	+ thêm đoạn chat mới
+	+ gửi ảnh, video
+ 
+***Profile**
+
+	+ Avatar, name , username
+	+ Post đã đăng
+	+ Follow/Follower
+	+ Hiển thị các bài viết đã đăng
+	+ Hiển thị các bài viết đã lưu lại
+
