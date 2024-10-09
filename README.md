@@ -37,3 +37,14 @@
 	+ Hiển thị các bài viết đã đăng
 	+ Hiển thị các bài viết đã lưu lại
 
+**Admin**
+
+	+ Viết trong mobile
+ 	+ Phân quyền tài khoản
+  	+ Quản lý và thông kê các user 
+   	+ Duyệt bài
+ 
+**Phần backend**
+
+ 	Sử dụng spring boot để viết webservice để ứng dụng call api từ đó về 
+
