@@ -64,16 +64,16 @@
 
 		
 
-		+Sửa trang chủ(thêm phần text, bình luận, active phần like, phần setting của bài viết -> xoá sửa,+ Tìm kiếm người dùng) = Toàn
+		+Sửa trang chủ(thêm phần text, bình luận, active phần like, phần setting của bài viết -> xoá sửa,+ Tìm kiếm người dùng) 1ng -> Toàn 
 
-		+ Đăng bài
+		+ Đăng bài ->  Nhung 
 
-		+ Login/Logup (), + Trang profile (sửa bài viết như trang chủ)
+		+ Login/Logup (), + Trang profile (sửa bài viết như trang chủ) -> Tuyết 
 
-		+ Trang thông báo 
+		+ Trang thông báo  -> 1 Thu
 
-		+ Trang bạn bè
-
+		+ Trang bạn bè -> 1 Tín
+ 
 		
 
 		
