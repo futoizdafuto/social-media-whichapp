@@ -3,9 +3,19 @@ import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/home/widgets/background.dart';
 
+import '../settings_modal/setting_item.dart';
+
+
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
+  
+ // Hàm xử lý sự kiện khi chọn Setting
+  static void _handleSetting(BuildContext context, String message) {
+    Navigator.pop(context); // Đóng modal
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+  
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -155,8 +165,29 @@ class HomeScreen extends StatelessWidget {
                               ],
                             ),
                             const Spacer(),
+                            // ----------------------------------------------------------------------//
+                            //xử lý setting bài viết ở đây
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                // Gọi modal với các tham số tùy chỉnh
+                                SettingsModal.show(
+                                  context,
+                                  items: [
+                                    SettingItem(
+                                      icon: Icons.settings,
+                                      title: 'Setting 1',
+                                      onTap: () => _handleSetting(
+                                          context, 'Setting 1 selected'),
+                                    ),
+                                    SettingItem(
+                                      icon: Icons.settings_applications,
+                                      title: 'Setting 2',
+                                      onTap: () => _handleSetting(
+                                          context, 'Setting 2 selected'),
+                                    ),
+                                  ],
+                                );
+                              },
                               icon: const Icon(Icons.more_vert, color: kWhite),
                             ),
                           ],
