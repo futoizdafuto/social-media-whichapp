@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: kAppThemeData,
       home: const OnboardingScreen(),
+      // home: SettingsWidget(),
     );
   }
 }
