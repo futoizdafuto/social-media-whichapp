@@ -131,25 +131,29 @@ class _PostsState extends State<Posts> {
               ),
             ),
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20.0),
-              alignment: Alignment.centerLeft,
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Colors.grey,
-                    width: 1.0,
+                margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                alignment: Alignment.centerLeft,
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.grey,
+                      width: 1.0,
+                    ),
                   ),
-                ),
-              ), // Căn chỉnh nội dung Container sang trái
-              child: const Text(
-                "Đây là content",
-              ),
-            )
+                ), // Căn chỉnh nội dung Container sang trái
+                child: Container(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: const Text(
+                    "Đây là content",
+                  ),
+                ))
           ],
         );
       },
     );
   }
+
+  // Border _boderContent(){}
 
   Container _buildPostStat({
     required BuildContext context,
