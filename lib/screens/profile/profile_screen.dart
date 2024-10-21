@@ -73,11 +73,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 80.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50.0),
+
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 50.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Stat(title: 'Posts', value: 35),
                     Stat(title: 'Followers', value: 1552),
                     Stat(title: 'Follows', value: 128),
