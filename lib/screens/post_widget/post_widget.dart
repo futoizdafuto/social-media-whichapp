@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/model/mock_post.dart';
-
 import '../settings_modal/setting_item.dart';
 
 class Posts extends StatefulWidget {
@@ -35,15 +34,15 @@ class _PostsState extends State<Posts> {
               margin: const EdgeInsets.only(
                 top: 30,
                 bottom: 10,
-                left: 15,
-                right: 15,
+                left: 0.5,
+                right: 0.5,
               ),
               padding: const EdgeInsets.all(14.0),
               height: size.height * 0.40,
               width: size.width,
               decoration: BoxDecoration(
                 // color: Colors.red,
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(3),
 
                 image: DecorationImage(
                   image: AssetImage(post.img_url), // khúc này sử dụng mock nè
@@ -144,7 +143,8 @@ class _PostsState extends State<Posts> {
                 child: Container(
                   padding: const EdgeInsets.only(bottom: 3),
                   child: const Text(
-                    "Đây là content",
+                    "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate iure fuga atque maxime aperiam distinctio quis at voluptate? Odit saepe iure tempore dolores earum omnis!",
+                    textAlign: TextAlign.justify,
                   ),
                 ))
           ],
