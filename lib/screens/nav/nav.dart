@@ -17,10 +17,10 @@ class _NavState extends State<Nav> {
   int _selectedIndex = 0;
 
   final _pages = [
-    HomeScreen(),
-    MessageScreen(),
-    Text('Fav List'),
-    ProfileScreen(),
+    const HomeScreen(),
+    const MessageScreen(),
+    const Text('Fav List'),
+    const ProfileScreen(),
   ];
 
   void _changePageTo(int index) {
@@ -65,7 +65,6 @@ class _NavState extends State<Nav> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // chuyển sang trang home
                   GestureDetector(
                     onTap: () => _changePageTo(0),
                     child: SvgPicture.asset(
@@ -73,7 +72,6 @@ class _NavState extends State<Nav> {
                       color: _selectedIndex == 0 ? kSelectedTabColor : null,
                     ),
                   ),
-                  // chuyển sang trang message
                   GestureDetector(
                     onTap: () => _changePageTo(1),
                     child: SvgPicture.asset(
@@ -82,7 +80,6 @@ class _NavState extends State<Nav> {
                     ),
                   ),
                   const SizedBox(),
-                  // chuyển sang trang favorite border
                   GestureDetector(
                     onTap: () => _changePageTo(2),
                     child: SvgPicture.asset(
@@ -90,7 +87,6 @@ class _NavState extends State<Nav> {
                       color: _selectedIndex == 2 ? kSelectedTabColor : null,
                     ),
                   ),
-                  // chuyển sang trang profile
                   GestureDetector(
                     onTap: () => _changePageTo(3),
                     child: SvgPicture.asset(
