@@ -76,7 +76,7 @@
 
 		+ Trang bạn bè -> 1 Tín
  
-		
+		+ Chuyển hướng từ thông báo sang bài viết ( Từ từ làm - Trang Details)
 
 		
 
