@@ -5,7 +5,7 @@ class Post {
   final String content;
   final String img_url;
   final String video_url;
-  final DateTime created_at;
+  final DateTime? created_at;
 
   //constructor
   Post(
@@ -36,7 +36,7 @@ class Post {
       'content': content,
       'img_url': img_url,
       'video_url': video_url,
-      'created_at': created_at.toIso8601String(),
+      'created_at': created_at?.toIso8601String(),
     };
   }
 }
