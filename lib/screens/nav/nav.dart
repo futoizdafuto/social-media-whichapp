@@ -19,7 +19,7 @@ class _NavState extends State<Nav> {
 
   final _pages = [
     HomeScreen(),
-    NotificationScreen(),
+    MessageScreen(),
     Text('Fav List'),
     ProfileScreen(),
   ];
