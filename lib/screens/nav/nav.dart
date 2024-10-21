@@ -17,10 +17,10 @@ class _NavState extends State<Nav> {
   int _selectedIndex = 0;
 
   final _pages = [
-    HomeScreen(),
-    MessageScreen(),
-    Text('Fav List'),
-    ProfileScreen(),
+    const HomeScreen(),
+    const MessageScreen(),
+    const Text('Fav List'),
+    const ProfileScreen(),
   ];
 
   void _changePageTo(int index) {
