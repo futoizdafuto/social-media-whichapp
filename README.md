@@ -65,6 +65,8 @@
 		
 
 		+Sửa trang chủ(thêm phần text, bình luận, active phần like, phần setting của bài viết -> xoá sửa,+ Tìm kiếm người dùng) 1ng -> Toàn 
+				
+				- Setting hoàn thành
 
 		+ Đăng bài ->  Nhung 
 
