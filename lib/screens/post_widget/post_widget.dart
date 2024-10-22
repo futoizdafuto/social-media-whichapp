@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/model/mock_post.dart';
+import 'package:socially_app_flutter_ui/screens/post_widget/reaction_widget.dart';
 import '../settings_modal/setting_item.dart';
 
 class Posts extends StatefulWidget {
@@ -12,6 +13,7 @@ class Posts extends StatefulWidget {
 }
 
 class _PostsState extends State<Posts> {
+  bool isActive = false; // Trạng thái của icon
   // Hàm xử lý sự kiện khi chọn Setting
   static void _handleSetting(BuildContext context, String message) {
     Navigator.pop(context); // Đóng modal
@@ -111,26 +113,44 @@ class _PostsState extends State<Posts> {
                     ],
                   ),
                   const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildPostStat(
-                        context: context,
-                        iconPath: 'assets/icons/favorite_border.svg',
-                        value: '5.2K',
-                      ),
-                      _buildPostStat(
-                        context: context,
-                        iconPath: 'assets/icons/comments.svg',
-                        value: '1.1K',
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
+
+            /// de phan reaction o day
             Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.only(
+                  left: 10,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    PostStat(
+                      iconPath:
+                          'assets/icons/favorite_border.svg', // Icon chưa active
+                      activeIconPath:
+                          'assets/icons/favorite_heart.svg', // Icon khi active
+                      value: '5.2K',
+                      isLikeButton: true,
+                      isActive: true,
+                      onTap: () {
+                        print("Liked the post!");
+                      },
+                    ),
+                    PostStat(
+                      iconPath: 'assets/icons/comments.svg',
+                      activeIconPath: '', // Chỉ để tham khảo, không sử dụng
+                      value: '1.1K',
+                      isLikeButton: false,
+                      onTap: () {
+                        print("Opened comments!");
+                      },
+                    ),
+                  ],
+                )),
+
+            Container(
+                margin: const EdgeInsets.symmetric(horizontal: 15.0),
                 alignment: Alignment.centerLeft,
                 decoration: const BoxDecoration(
                   border: Border(
@@ -150,40 +170,6 @@ class _PostsState extends State<Posts> {
           ],
         );
       },
-    );
-  }
-
-  // Border _boderContent(){}
-
-  Container _buildPostStat({
-    required BuildContext context,
-    required String iconPath,
-    required String value,
-  }) {
-    // nút like
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: 4.0,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE5E5E5).withOpacity(0.40),
-        borderRadius: BorderRadius.circular(35.0),
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            iconPath,
-            color: kWhite,
-          ),
-          const SizedBox(width: 8.0),
-          Text(
-            value,
-            style:
-                Theme.of(context).textTheme.labelSmall!.copyWith(color: kWhite),
-          ),
-        ],
-      ),
     );
   }
 }
