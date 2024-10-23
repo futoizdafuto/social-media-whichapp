@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/model/mock_post.dart';
+import 'package:socially_app_flutter_ui/screens/comment_model/comment_modal.dart';
 import 'package:socially_app_flutter_ui/screens/post_widget/reaction_widget.dart';
 import '../settings_modal/setting_item.dart';
 
@@ -143,6 +144,7 @@ class _PostsState extends State<Posts> {
                       value: '1.1K',
                       isLikeButton: false,
                       onTap: () {
+                        CommentModal.show(context);
                         print("Opened comments!");
                       },
                     ),
