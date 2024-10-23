@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+// import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/model/mock_post.dart';
 import 'package:socially_app_flutter_ui/screens/comment_model/comment_modal.dart';
