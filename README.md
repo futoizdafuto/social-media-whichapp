@@ -75,6 +75,10 @@
 		+ Đăng bài ->  Nhung 
 
 		+ Login/Logup (), + Trang profile (sửa bài viết như trang chủ) -> Tuyết 
+  			- Login hoàn thành
+     			- Trang đăng ký hoàn thành
+			- Nút đăng xuất ở nút cài đặt trang profile hoàn thành
+   			- Nút setting bài viết ở trang profile hoàn thành
 
 		+ Trang thông báo  -> 1 Thu
 
