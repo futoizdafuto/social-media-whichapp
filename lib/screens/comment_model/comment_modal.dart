@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/screens/comment_model/comment_items.dart';
 
 class CommentModal {
   static Future<void> show(BuildContext context) async {
@@ -13,26 +14,21 @@ class CommentModal {
         builder: (context) {
           return Container(
             decoration: const BoxDecoration(
-              // color: Colors.grey,
               borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
             ),
             margin: const EdgeInsets.only(top: 35),
             // color: Colors.grey,
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               top: 20,
               left: 16,
               right: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // phần hiển thị lượt reaction
                 Container(
-                  // decoration: const BoxDecoration(
-                  //     border: Border(
-                  //         bottom: BorderSide(
-                  //   color: Colors.grey,
-                  //   width: 1.0,
-                  // ))),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -48,14 +44,53 @@ class CommentModal {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 16),
-                // phần hiển thị cấc comment\
-
+                // phần hiển thị cấc comment
                 Expanded(
                     child: ListView(
                   children: const [
-                    
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
+                    CommentItems(
+                      avatar_url: "https://via.placeholder.com/48",
+                      user_name: "John Doe",
+                      comment_content: "Great post!",
+                      timestamp: "5 mins ago",
+                    ),
                   ],
                 )),
                 // phần nhập comment
@@ -65,14 +100,16 @@ class CommentModal {
                   children: [
                     Expanded(
                       child: TextField(
+                        maxLines: 5,
+                        minLines: 1,
                         decoration: InputDecoration(
                             hintText: "Viết bình luận",
-                            contentPadding: const EdgeInsets.only(left: 25),
+                            contentPadding: const EdgeInsets.all(15),
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30))),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     IconButton(
                         onPressed: () {},
                         icon: const Icon(
