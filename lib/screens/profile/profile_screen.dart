@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:socially_app_flutter_ui/config/colors.dart';
-import 'package:socially_app_flutter_ui/screens/profile/widgets/profile_background.dart';
 import 'dart:math' as math;
 
-import 'package:socially_app_flutter_ui/screens/profile/widgets/stat.dart';
+import '../../config/colors.dart';
+import 'widgets/profile_background.dart';
+import 'widgets/stat.dart';
+import '../login/login_screen.dart'; 
+import 'setting_profile/setting_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -28,6 +30,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           automaticallyImplyLeading: false,
+ actions: [
+  Padding(
+    padding: const EdgeInsets.only(right: 16.0),
+    child: IconButton(
+      icon: SvgPicture.asset('assets/icons/menu.svg'),
+      onPressed: () {
+        // Show modal with half-screen content directly
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const SettingProfileScreen(),
+        );
+      },
+    ),
+  ),
+],
+
+
+
+
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -105,7 +128,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-              // we'll use flutter_staggered_grid_view package here:
               Padding(
                 padding: const EdgeInsets.all(13.0),
                 child: StaggeredGrid.count(
