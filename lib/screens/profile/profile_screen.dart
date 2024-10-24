@@ -8,7 +8,7 @@ import 'widgets/profile_background.dart';
 import 'widgets/stat.dart';
 import '../login/login_screen.dart'; 
 import 'setting_profile/setting_profile_screen.dart';
-
+import '../settings_modal/setting_item.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -18,7 +18,12 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTab = 'photos';
-
+ // Hàm xử lý sự kiện khi chọn Setting
+  static void _handleSetting(BuildContext context, String message) {
+    Navigator.pop(context); // Đóng modal
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
   _changeTab(String tab) {
     setState(() => _selectedTab = tab);
   }
@@ -140,9 +145,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisCellCount: 1.5,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-5.png',
-                          fit: BoxFit.cover,
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              'assets/images/Rectangle-5.png',
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: IconButton(
+                                onPressed: () {
+                                  // Gọi modal với các tham số tùy chỉnh
+                                  SettingsModal.show(
+                                    context,
+                                    items: [
+                                      SettingItem(
+                                        icon: Icons.edit,
+                                        title: 'Sửa bài viết',
+                                        onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                                      ),
+                                      SettingItem(
+                                        icon: Icons.delete,
+                                        title: 'Xóa bài viết',
+                                        onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                icon: const Icon(Icons.more_vert, color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -151,9 +185,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisCellCount: 1,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-7.png',
-                          fit: BoxFit.cover,
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              'assets/images/Rectangle-7.png',
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: IconButton(
+                                onPressed: () {
+                                  // Gọi modal với các tham số tùy chỉnh
+                                  SettingsModal.show(
+                                    context,
+                                    items: [
+                                      SettingItem(
+                                        icon: Icons.edit,
+                                        title: 'Sửa bài viết',
+                                        onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                                      ),
+                                      SettingItem(
+                                        icon: Icons.delete,
+                                        title: 'Xóa bài viết',
+                                        onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                icon: const Icon(Icons.more_vert, color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -162,9 +225,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisCellCount: 1.5,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-8.png',
-                          fit: BoxFit.cover,
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              'assets/images/Rectangle-8.png',
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: IconButton(
+                                onPressed: () {
+                                  // Gọi modal với các tham số tùy chỉnh
+                                  SettingsModal.show(
+                                    context,
+                                    items: [
+                                      SettingItem(
+                                        icon: Icons.edit,
+                                        title: 'Sửa bài viết',
+                                        onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                                      ),
+                                      SettingItem(
+                                        icon: Icons.delete,
+                                        title: 'Xóa bài viết',
+                                        onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                icon: const Icon(Icons.more_vert, color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -173,15 +265,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisCellCount: 1,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-1.png',
-                          fit: BoxFit.cover,
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              'assets/images/Rectangle-1.png',
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: IconButton(
+                                onPressed: () {
+                                  // Gọi modal với các tham số tùy chỉnh
+                                  SettingsModal.show(
+                                    context,
+                                    items: [
+                                      SettingItem(
+                                        icon: Icons.edit,
+                                        title: 'Sửa bài viết',
+                                        onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                                      ),
+                                      SettingItem(
+                                        icon: Icons.delete,
+                                        title: 'Xóa bài viết',
+                                        onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                icon: const Icon(Icons.more_vert, color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
+
             ],
           ),
         ),
