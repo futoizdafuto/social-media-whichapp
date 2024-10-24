@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
           title: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(
-              'Socially',
+              'Which App',
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
@@ -31,10 +31,11 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.only(right: 16.0),
               child: IconButton(
                 onPressed: () {
-                 // Thêm Navigator.push để chuyển trang
+                  // Thêm Navigator.push để chuyển trang
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NotificationScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const NotificationScreen()),
                   );
                 },
                 icon: SvgPicture.asset('assets/icons/notif.svg'),

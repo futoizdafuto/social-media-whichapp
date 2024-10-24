@@ -70,6 +70,7 @@
 				- Nút like hoàn thành
 				- Content hoàn thành
 				- Active nút like hoàn thành 
+				- Xong phần comment
 
 		+ Đăng bài ->  Nhung 
 
