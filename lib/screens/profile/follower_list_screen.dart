@@ -4,17 +4,17 @@ class Follower {
   final String name;
   final String subtitle;
   final String profileImageUrl;
-  final bool isFollowing; // If true, show the "Remove" button, otherwise "Follow"
+  bool isFollowing; // Change to mutable
 
   Follower({
     required this.name,
     required this.subtitle,
     required this.profileImageUrl,
-    required this.isFollowing,
+    this.isFollowing = false, // Default value
   });
 }
 
-class FollowerListScreen extends StatelessWidget {
+class FollowerListScreen extends StatefulWidget {
   final String title;
   final List<Follower> followers;
   final List<Follower> suggestedUsers;
@@ -27,10 +27,15 @@ class FollowerListScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _FollowerListScreenState createState() => _FollowerListScreenState();
+}
+
+class _FollowerListScreenState extends State<FollowerListScreen> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -60,7 +65,7 @@ class FollowerListScreen extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  ...followers.map((follower) => _buildFollowerTile(follower)),
+                  ...widget.followers.map((follower) => _buildFollowerTile(follower)),
                   Divider(),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -70,7 +75,7 @@ class FollowerListScreen extends StatelessWidget {
                           fontSize: 16.0,
                         )),
                   ),
-                  ...suggestedUsers.map((user) => _buildFollowerTile(user)),
+                  ...widget.suggestedUsers.map((user) => _buildFollowerTile(user)),
                 ],
               ),
             ),
@@ -90,12 +95,19 @@ class FollowerListScreen extends StatelessWidget {
       subtitle: Text(follower.subtitle),
       trailing: ElevatedButton(
         onPressed: () {
-          // Add functionality for Follow/Remove button here
+          setState(() {
+            // Toggle follow state and update button text
+            if (follower.isFollowing) {
+              follower.isFollowing = false; // Unfollow
+            } else {
+              follower.isFollowing = true; // Follow
+            }
+          });
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: follower.isFollowing ? Colors.grey : Colors.blue,
         ),
-        child: Text(follower.isFollowing ? 'Xóa' : 'Theo dõi'),
+        child: Text(follower.isFollowing ? 'Đã theo dõi' : 'Theo dõi'),
       ),
     );
   }

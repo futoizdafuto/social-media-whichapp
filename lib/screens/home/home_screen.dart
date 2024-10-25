@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/screens/home/widgets/background.dart';
+import 'package:socially_app_flutter_ui/screens/notification/notification_screen.dart';
 import '../post_widget/post_widget.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class HomeScreen extends StatelessWidget {
           title: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(
-              'Socially',
+              'Which App',
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
@@ -29,7 +30,14 @@ class HomeScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Thêm Navigator.push để chuyển trang
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const NotificationScreen()),
+                  );
+                },
                 icon: SvgPicture.asset('assets/icons/notif.svg'),
               ),
             ),

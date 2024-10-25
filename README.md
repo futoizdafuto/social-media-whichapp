@@ -67,10 +67,18 @@
 		+Sửa trang chủ(thêm phần text, bình luận, active phần like, phần setting của bài viết -> xoá sửa,+ Tìm kiếm người dùng) 1ng -> Toàn 
 				
 				- Setting hoàn thành
+				- Nút like hoàn thành
+				- Content hoàn thành
+				- Active nút like hoàn thành 
+				- Xong phần comment
 
 		+ Đăng bài ->  Nhung 
 
 		+ Login/Logup (), + Trang profile (sửa bài viết như trang chủ) -> Tuyết 
+  			- Login hoàn thành
+     			- Trang đăng ký hoàn thành
+			- Nút đăng xuất ở nút cài đặt trang profile hoàn thành
+   			- Nút setting bài viết ở trang profile hoàn thành
 
 		+ Trang thông báo  -> 1 Thu
 
