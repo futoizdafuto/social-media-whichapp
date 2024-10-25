@@ -44,10 +44,10 @@ class _NavState extends State<Nav> {
       bottomNavigationBar: _selectedIndex == 1
           ? null
           : Container(
-              height: 80.0,
+              height: 60.0,
               width: double.infinity,
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.only(top: 19.0),
+              alignment: Alignment.center,
+              // padding: const EdgeInsets.only(top: 19.0),
               decoration: BoxDecoration(
                 color: kWhite,
                 borderRadius: const BorderRadius.only(
@@ -65,7 +65,6 @@ class _NavState extends State<Nav> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-
                   // chuyển sang trang home
                   GestureDetector(
                     onTap: () => _changePageTo(0),
