@@ -4,8 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/profile/widgets/profile_background.dart';
 import 'dart:math' as math;
-
 import 'package:socially_app_flutter_ui/screens/profile/widgets/stat.dart';
+import 'follower_list_screen.dart'; // Import the follower list screen
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -20,6 +20,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
   _changeTab(String tab) {
     setState(() => _selectedTab = tab);
   }
+
+  // Sample followers and suggested users for mockup purposes
+  final List<Follower> followers = [
+    Follower(
+      name: 'rosanween',
+      subtitle: 'Han Ngoc Dao',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: true,
+    ),
+    Follower(
+      name: 'yatih5127',
+      subtitle: 'HAYATI',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: true,
+    ),
+  ];
+
+  final List<Follower> suggestedUsers = [
+    Follower(
+      name: 'lidiasusanti884',
+      subtitle: 'Lidia Susanti',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: false,
+    ),
+    Follower(
+      name: 'sumirah9586',
+      subtitle: '@miratutut',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: false,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -77,10 +108,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 50.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Stat(title: 'Posts', value: 35),
-                    Stat(title: 'Followers', value: 1552),
-                    Stat(title: 'Follows', value: 128),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to Follower list with followers and suggested users
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FollowerListScreen(
+                              title: 'Followers',
+                              followers: followers,
+                              suggestedUsers: suggestedUsers,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Stat(title: 'Followers', value: 1552),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to Following list with followers and suggested users
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FollowerListScreen(
+                              title: 'Following',
+                              followers: followers,
+                              suggestedUsers: suggestedUsers,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Stat(title: 'Following', value: 128),
+                    ),
                   ],
                 ),
               ),
@@ -104,7 +165,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
-              // we'll use flutter_staggered_grid_view package here:
               Padding(
                 padding: const EdgeInsets.all(13.0),
                 child: StaggeredGrid.count(

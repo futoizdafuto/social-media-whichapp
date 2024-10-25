@@ -20,3 +20,5 @@ const k3AccentLines = Color(0xFFEEF2E2);
 const kCaption = Color(0xFF656565);
 
 const kSelectedTabColor = Color(0xFF7DB9B3);
+
+const kHeartRed = Color(0xFFDF5C4E);
