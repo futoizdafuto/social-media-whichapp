@@ -24,4 +24,5 @@ def flutterSdkPath = properties.getProperty("flutter.sdk")
 assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 
 // Load the Flutter plugin
-apply from: "D:\\Flutter sdk\\flutter\\packages\\flutter_tools\\gradle\\app_plugin_loader.gradle"
+// apply from: "D:\\Flutter sdk\\flutter\\packages\\flutter_tools\\gradle\\app_plugin_loader.gradle"
+apply from: "C:\\src\\flutter\\packages\\flutter_tools\\gradle\\app_plugin_loader.gradle"
