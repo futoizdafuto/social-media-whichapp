@@ -6,7 +6,8 @@ import 'package:socially_app_flutter_ui/screens/profile/widgets/profile_backgrou
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/profile/widgets/stat.dart';
 import 'follower_list_screen.dart'; // Import the follower list screen
-
+import '../settings_modal/setting_item.dart';
+import 'setting_profile/setting_profile_screen.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -16,7 +17,12 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTab = 'photos';
-
+ // Hàm xử lý sự kiện khi chọn Setting
+  static void _handleSetting(BuildContext context, String message) {
+    Navigator.pop(context); // Đóng modal
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
   _changeTab(String tab) {
     setState(() => _selectedTab = tab);
   }
@@ -59,7 +65,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           automaticallyImplyLeading: false,
+           actions: [
+  Padding(
+    padding: const EdgeInsets.only(right: 16.0),
+    child: IconButton(
+      icon: SvgPicture.asset('assets/icons/menu.svg'),
+      onPressed: () {
+        // Show modal with half-screen content directly
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => const SettingProfileScreen(),
+        );
+      },
+    ),
+  ),
+],
         ),
+        
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -166,59 +190,176 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.all(13.0),
-                child: StaggeredGrid.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 14.0,
-                  crossAxisSpacing: 14.0,
-                  children: [
-                    StaggeredGridTile.count(
-                      crossAxisCellCount: 1,
-                      mainAxisCellCount: 1.5,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-5.png',
-                          fit: BoxFit.cover,
+  padding: const EdgeInsets.all(13.0),
+  child: StaggeredGrid.count(
+    crossAxisCount: 2,
+    mainAxisSpacing: 14.0,
+    crossAxisSpacing: 14.0,
+    children: [
+      StaggeredGridTile.count(
+        crossAxisCellCount: 1,
+        mainAxisCellCount: 1.5,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19.0),
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/Rectangle-5.png',
+                fit: BoxFit.cover,
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () {
+                    // Gọi modal với các tham số tùy chỉnh
+                    SettingsModal.show(
+                      context,
+                      items: [
+                        SettingItem(
+                          icon: Icons.edit,
+                          title: 'Sửa bài viết',
+                          onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
                         ),
-                      ),
-                    ),
-                    StaggeredGridTile.count(
-                      crossAxisCellCount: 1,
-                      mainAxisCellCount: 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-7.png',
-                          fit: BoxFit.cover,
+                        SettingItem(
+                          icon: Icons.delete,
+                          title: 'Xóa bài viết',
+                          onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
                         ),
-                      ),
-                    ),
-                    StaggeredGridTile.count(
-                      crossAxisCellCount: 1,
-                      mainAxisCellCount: 1.5,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-8.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    StaggeredGridTile.count(
-                      crossAxisCellCount: 1,
-                      mainAxisCellCount: 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(19.0),
-                        child: Image.asset(
-                          'assets/images/Rectangle-1.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
+                      ],
+                    );
+                  },
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+      StaggeredGridTile.count(
+        crossAxisCellCount: 1,
+        mainAxisCellCount: 1,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19.0),
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/Rectangle-7.png',
+                fit: BoxFit.cover,
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () {
+                    // Gọi modal với các tham số tùy chỉnh
+                    SettingsModal.show(
+                      context,
+                      items: [
+                        SettingItem(
+                          icon: Icons.edit,
+                          title: 'Sửa bài viết',
+                          onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                        ),
+                        SettingItem(
+                          icon: Icons.delete,
+                          title: 'Xóa bài viết',
+                          onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                        ),
+                      ],
+                    );
+                  },
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      StaggeredGridTile.count(
+        crossAxisCellCount: 1,
+        mainAxisCellCount: 1.5,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19.0),
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/Rectangle-8.png',
+                fit: BoxFit.cover,
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () {
+                    // Gọi modal với các tham số tùy chỉnh
+                    SettingsModal.show(
+                      context,
+                      items: [
+                        SettingItem(
+                          icon: Icons.edit,
+                          title: 'Sửa bài viết',
+                          onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                        ),
+                        SettingItem(
+                          icon: Icons.delete,
+                          title: 'Xóa bài viết',
+                          onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                        ),
+                      ],
+                    );
+                  },
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      StaggeredGridTile.count(
+        crossAxisCellCount: 1,
+        mainAxisCellCount: 1,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19.0),
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/Rectangle-1.png',
+                fit: BoxFit.cover,
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () {
+                    // Gọi modal với các tham số tùy chỉnh
+                    SettingsModal.show(
+                      context,
+                      items: [
+                        SettingItem(
+                          icon: Icons.edit,
+                          title: 'Sửa bài viết',
+                          onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                        ),
+                        SettingItem(
+                          icon: Icons.delete,
+                          title: 'Xóa bài viết',
+                          onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                        ),
+                      ],
+                    );
+                  },
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
             ],
           ),
         ),
