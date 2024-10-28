@@ -109,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Stat(title: 'Posts', value: 35),
+                    const Stat(title: 'Posts', value: 35),
                     GestureDetector(
                       onTap: () {
                         // Navigate to Follower list with followers and suggested users
@@ -124,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         );
                       },
-                      child: Stat(title: 'Followers', value: 1552),
+                      child: const Stat(title: 'Followers', value: 1552),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -140,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         );
                       },
-                      child: Stat(title: 'Following', value: 128),
+                      child: const Stat(title: 'Following', value: 128),
                     ),
                   ],
                 ),

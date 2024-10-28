@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/comment_model/comment_items.dart';
 

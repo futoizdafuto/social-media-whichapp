@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '../../config/colors.dart';
-import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
 import 'widgets/register_widget.dart';
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
 
@@ -19,7 +17,8 @@ class _RegisterscreenState extends State<Registerscreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isObscure = true;
   @override
   Widget build(BuildContext context) {
@@ -66,7 +65,8 @@ class _RegisterscreenState extends State<Registerscreen> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Email không được để trống';
-                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                            .hasMatch(value)) {
                           return 'Email không hợp lệ';
                         }
                         return null;
@@ -94,48 +94,52 @@ class _RegisterscreenState extends State<Registerscreen> {
                     ),
                     const SizedBox(height: 20.0),
 
-                  // Trường nhập mật khẩu
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _isObscure, 
-                    decoration: InputDecoration(
-                      labelText: 'Mật khẩu',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                   suffixIcon: IconButton(
+                    // Trường nhập mật khẩu
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _isObscure,
+                      decoration: InputDecoration(
+                        labelText: 'Mật khẩu',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        suffixIcon: IconButton(
                           icon: Icon(
-                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                            _isObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                           onPressed: () {
                             setState(() {
-                              _isObscure = !_isObscure; // Toggle password visibility
+                              _isObscure =
+                                  !_isObscure; // Toggle password visibility
                             });
                           },
                         ),
                       ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Mật khẩu không được để trống';
-                      } else if (value.length < 6) {
-                        return 'Mật khẩu phải có ít nhất 6 ký tự';
-                      } else if (!RegExp(r'(?=.*[0-9])').hasMatch(value)) {
-                        return 'Mật khẩu phải có ít nhất 1 chữ số';
-                      } else if (!RegExp(r'(?=.*[!@#\$&*~%^])').hasMatch(value)) {
-                        return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
-                      }
-                      return null;
-                    },
-                  ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Mật khẩu không được để trống';
+                        } else if (value.length < 6) {
+                          return 'Mật khẩu phải có ít nhất 6 ký tự';
+                        } else if (!RegExp(r'(?=.*[0-9])').hasMatch(value)) {
+                          return 'Mật khẩu phải có ít nhất 1 chữ số';
+                        } else if (!RegExp(r'(?=.*[!@#\$&*~%^])')
+                            .hasMatch(value)) {
+                          return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
+                        }
+                        return null;
+                      },
+                    ),
 
                     const SizedBox(height: 20.0),
 
                     // Trường nhập lại mật khẩu
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: _isObscure, 
+                      obscureText: _isObscure,
                       decoration: InputDecoration(
                         labelText: 'Nhập lại mật khẩu',
                         border: OutlineInputBorder(
@@ -143,13 +147,16 @@ class _RegisterscreenState extends State<Registerscreen> {
                         ),
                         filled: true,
                         fillColor: Colors.grey[100],
-                     suffixIcon: IconButton(
+                        suffixIcon: IconButton(
                           icon: Icon(
-                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                            _isObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                           onPressed: () {
                             setState(() {
-                              _isObscure = !_isObscure; // Toggle password visibility
+                              _isObscure =
+                                  !_isObscure; // Toggle password visibility
                             });
                           },
                         ),
@@ -190,8 +197,12 @@ class _RegisterscreenState extends State<Registerscreen> {
                           children: [
                             Text(
                               'Đăng ký',
-                              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                    color: const Color.fromARGB(255, 255, 255, 255),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall!
+                                  .copyWith(
+                                    color: const Color.fromARGB(
+                                        255, 255, 255, 255),
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.bold,
                                   ),

@@ -37,7 +37,7 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -53,7 +53,7 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Tìm kiếm',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                   ),
@@ -65,17 +65,19 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  ...widget.followers.map((follower) => _buildFollowerTile(follower)),
-                  Divider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  ...widget.followers
+                      .map((follower) => _buildFollowerTile(follower)),
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text('Gợi ý cho bạn',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
                         )),
                   ),
-                  ...widget.suggestedUsers.map((user) => _buildFollowerTile(user)),
+                  ...widget.suggestedUsers
+                      .map((user) => _buildFollowerTile(user)),
                 ],
               ),
             ),
