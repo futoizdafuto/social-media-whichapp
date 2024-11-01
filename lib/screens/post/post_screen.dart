@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
 
+import '../../data/models/post/post.dart';
+import '../../data/repository/post_repository.dart';
+
 class PostScreen extends StatefulWidget {
   const PostScreen({Key? key}) : super(key: key);
 
@@ -11,6 +14,7 @@ class PostScreen extends StatefulWidget {
 class _PostScreenState extends State<PostScreen> {
   final TextEditingController _contentController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+ 
 
   @override
   Widget build(BuildContext context) {

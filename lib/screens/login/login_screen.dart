@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Trường nhập mật khẩu
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: _isObscure, 
+                      obscureText: _isObscure,
                       decoration: InputDecoration(
                         labelText: 'Mật khẩu',
                         border: OutlineInputBorder(
@@ -80,13 +80,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         filled: true,
                         fillColor: Colors.grey[100],
-                       suffixIcon: IconButton(
+                        suffixIcon: IconButton(
                           icon: Icon(
-                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                            _isObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                           ),
                           onPressed: () {
                             setState(() {
-                              _isObscure = !_isObscure; // Toggle password visibility
+                              _isObscure =
+                                  !_isObscure; // Toggle password visibility
                             });
                           },
                         ),
@@ -126,7 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Text(
                               'Đăng nhập',
-                              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall!
+                                  .copyWith(
                                     color: const Color.fromARGB(255, 0, 0, 0),
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.bold,
@@ -143,50 +149,52 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20.0),
 
-                  // Nút đăng nhập bằng Google
-                  GestureDetector(
-  onTap: () {
-    // Điều hướng đến trang Nav
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const Nav(),
-      ),
-    );
-  },
-  child: Container(
-    width: size.width * 0.75,
-    height: 55.0,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: Colors.white, // Nền trắng cho nút Google
-      borderRadius: BorderRadius.circular(30.0),
-      border: Border.all(color: Colors.grey), // Viền xám nhẹ
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SvgPicture.asset(
-          'assets/icons/google_logo.svg.svg', // Đảm bảo có biểu tượng Google trong thư mục assets
-          height: 24.0, // Kích thước biểu tượng
-        ),
-        const SizedBox(width: 16.0),
-        Text(
-          'Đăng nhập bằng Google',
-          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: Colors.black,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
-    ),
-  ),
-),
+                    // Nút đăng nhập bằng Google
+                    GestureDetector(
+                      onTap: () {
+                        // Điều hướng đến trang Nav
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Nav(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: size.width * 0.75,
+                        height: 55.0,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white, // Nền trắng cho nút Google
+                          borderRadius: BorderRadius.circular(30.0),
+                          border:
+                              Border.all(color: Colors.grey), // Viền xám nhẹ
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/icons/google_logo.svg.svg', // Đảm bảo có biểu tượng Google trong thư mục assets
+                              height: 24.0, // Kích thước biểu tượng
+                            ),
+                            const SizedBox(width: 16.0),
+                            Text(
+                              'Đăng nhập bằng Google',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall!
+                                  .copyWith(
+                                    color: Colors.black,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                     const SizedBox(height: 20.0),
-
-
 
                     // Dòng hỏi chưa có tài khoản
                     Row(
