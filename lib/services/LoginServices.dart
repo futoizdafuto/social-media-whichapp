@@ -51,7 +51,7 @@ Future<Map<String, dynamic>> reLogin(String token) async {
         return {'status': 'success', 'newToken': newToken};
       }
     }
-    return {'status': 'error', 'message': 'Re-login failed'};
+    return {'status': 'error', 'message': 'Hết phiên đăng nhập'};
   } catch (e) {
     return {'status': 'error', 'message': 'Lỗi kết nối: $e'};
   }

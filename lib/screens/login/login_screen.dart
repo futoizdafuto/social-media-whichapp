@@ -208,12 +208,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     GestureDetector(
                       onTap: () {
                         // Điều hướng đến trang Nav
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Nav(),
-                          ),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const Nav(),
+                        //   ),
+                        // );
                       },
                       child: Container(
                         width: size.width * 0.75,
