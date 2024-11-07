@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/services/RegisterService.dart';
 
 import '../../config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
@@ -20,7 +21,38 @@ class _RegisterscreenState extends State<Registerscreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController(); // Name controller
   bool _isObscure = true;
+  String? _errorMessage; // Để hiển thị thông báo lỗi
+ // Hàm xử lý đăng ký
+  Future<void> handleRegister() async {
+    if (_formKey.currentState!.validate()) {
+      String username = _usernameController.text;
+      String password = _passwordController.text;
+      String email = _emailController.text;
+      String name = _nameController.text;
+
+      final registerService = RegisterService();
+      final response = await registerService.register(username, password, email, name);
+
+      if (response['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đăng ký thành công!')),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      } else {
+        setState(() {
+          _errorMessage = response['message'];
+        });
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -49,7 +81,37 @@ class _RegisterscreenState extends State<Registerscreen> {
                             letterSpacing: 1.5, // Khoảng cách giữa các chữ cái
                           ),
                     ),
-                    const SizedBox(height: 40.0),
+                    const SizedBox(height: 10.0),
+
+                    // Hiển thị thông báo lỗi nếu có
+                    if (_errorMessage != null) ...[
+                
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                    const SizedBox(height: 10.0),
+                    
+// Trường nhập username
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Username không được để trống';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 10.0),
 
                     // Trường nhập email
                     TextFormField(
@@ -72,13 +134,12 @@ class _RegisterscreenState extends State<Registerscreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20.0),
-
-                    // Trường nhập username
+                    const SizedBox(height: 10.0),
+// Trường nhập tên
                     TextFormField(
-                      controller: _usernameController,
+                      controller: _nameController, // Use the name controller
                       decoration: InputDecoration(
-                        labelText: 'Username',
+                        labelText: 'Tên',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
@@ -87,55 +148,55 @@ class _RegisterscreenState extends State<Registerscreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Username không được để trống';
+                          return 'Tên không được để trống';
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20.0),
+                    
+                    const SizedBox(height: 10.0),
 
-                  // Trường nhập mật khẩu
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _isObscure, 
-                    decoration: InputDecoration(
-                      labelText: 'Mật khẩu',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                   suffixIcon: IconButton(
+                    // Trường nhập mật khẩu
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _isObscure,
+                      decoration: InputDecoration(
+                        labelText: 'Mật khẩu',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        suffixIcon: IconButton(
                           icon: Icon(
                             _isObscure ? Icons.visibility_off : Icons.visibility,
                           ),
                           onPressed: () {
                             setState(() {
-                              _isObscure = !_isObscure; // Toggle password visibility
+                              _isObscure = !_isObscure;
                             });
                           },
                         ),
                       ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Mật khẩu không được để trống';
-                      } else if (value.length < 6) {
-                        return 'Mật khẩu phải có ít nhất 6 ký tự';
-                      } else if (!RegExp(r'(?=.*[0-9])').hasMatch(value)) {
-                        return 'Mật khẩu phải có ít nhất 1 chữ số';
-                      } else if (!RegExp(r'(?=.*[!@#\$&*~%^])').hasMatch(value)) {
-                        return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
-                      }
-                      return null;
-                    },
-                  ),
-
-                    const SizedBox(height: 20.0),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Mật khẩu không được để trống';
+                        } else if (value.length < 6) {
+                          return 'Mật khẩu phải có ít nhất 6 ký tự';
+                        } else if (!RegExp(r'(?=.*[0-9])').hasMatch(value)) {
+                          return 'Mật khẩu phải có ít nhất 1 chữ số';
+                        } else if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
+                          return 'Mật khẩu phải có ít nhất 1 ký tự viết hoa';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 10.0),
 
                     // Trường nhập lại mật khẩu
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: _isObscure, 
+                      obscureText: _isObscure,
                       decoration: InputDecoration(
                         labelText: 'Nhập lại mật khẩu',
                         border: OutlineInputBorder(
@@ -143,7 +204,7 @@ class _RegisterscreenState extends State<Registerscreen> {
                         ),
                         filled: true,
                         fillColor: Colors.grey[100],
-                     suffixIcon: IconButton(
+                        suffixIcon: IconButton(
                           icon: Icon(
                             _isObscure ? Icons.visibility_off : Icons.visibility,
                           ),
@@ -161,22 +222,11 @@ class _RegisterscreenState extends State<Registerscreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 40.0),
+                    const SizedBox(height: 10.0),
 
-                    // Nút đăng ký
+                    // Nút đăng ký và xử lý lỗi
                     GestureDetector(
-                      onTap: () {
-                        // Validate inputs
-                        if (_formKey.currentState!.validate()) {
-                          // Navigate to login screen after successful registration
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
-                            ),
-                          );
-                        }
-                      },
+                      onTap: () => handleRegister(),
                       child: Container(
                         width: size.width * 0.75,
                         height: 55.0,
@@ -205,7 +255,8 @@ class _RegisterscreenState extends State<Registerscreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 0),
+
+                    const SizedBox(height: 5.0),
 
                     // Dòng hỏi đã có tài khoản chưa
                     Row(
@@ -241,4 +292,6 @@ class _RegisterscreenState extends State<Registerscreen> {
       ),
     );
   }
+
+
 }
