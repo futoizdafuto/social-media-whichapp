@@ -3,6 +3,7 @@ import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'dart:async';
 
+import '../../config/colors.dart';
 import '../../data/models/post/post.dart';
 
 class MediaCard extends StatefulWidget {
@@ -421,7 +422,7 @@ class _MediaCardState extends State<MediaCard> {
               child: CircleAvatar(
                 radius: 5,
                 backgroundColor: _currentIndex == index
-                    ? Colors.white
+                    ? kBlack
                     : Colors.white.withOpacity(0.6),
               ),
             ),
