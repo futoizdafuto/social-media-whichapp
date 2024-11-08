@@ -28,15 +28,14 @@ class _PostsState extends State<Posts> {
   late Future<List<Post>> posts;
   late final UserRepository userRepository = UserRepository();
   late Future<List<User>> users;
-  String token =
-      'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwZV9wZWFuNSIsImlhdCI6MTczMDk0ODM0NCwiZXhwIjoxNzMyMjQ0MzQ0fQ.sxxGM5W6uPH-ZQz6bQ61hBhtmcmsOoyWeKnAL55gVnzg6lvx82bhlxC7yJfGkA5YA3idyVLc3GO54flBgTjENg';
+  
   @override
   void initState() {
     super
         .initState(); // Gọi initState() của lớp cha (State) để đảm bảo các thiết lập hệ thống được thực hiện.
     posts = postRepository.fetchPost(
-        token); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
-    users = userRepository.fetchUser();
+        ); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
+    // users = userRepository.fetchUser();
   }
 
   // trạng thái active cho nút like
