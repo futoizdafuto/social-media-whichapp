@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/user/user.dart';
 
 class UserRepository {
-  final String api_url = 'http://10.0.2.2:8080/api/users';
+  final String api_url = 'http://192.168.100.252:8080/api/users';
   
 
   Future<List<User>> fetchUser() async {
