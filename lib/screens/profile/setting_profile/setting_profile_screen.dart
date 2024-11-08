@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
+import 'package:socially_app_flutter_ui/services/LoginServices.dart';
 class SettingProfileScreen extends StatefulWidget {
   const SettingProfileScreen({Key? key}) : super(key: key);
 
@@ -12,6 +13,9 @@ class SettingProfileScreen extends StatefulWidget {
 
 class _SettingProfileScreenState extends State<SettingProfileScreen> {
   String _selectedTab = 'photos';
+  final LoginService _loginService = LoginService();
+  
+
 
   _changeTab(String tab) {
     setState(() => _selectedTab = tab);
@@ -60,18 +64,31 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
               // Handle account settings action
             },
           ),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: const Text('Đăng xuất'),
-            onTap: () {
-              Navigator.pop(context); // Close the modal
-              // Navigate to LoginScreen
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-            },
-          ),
+         ListTile(
+  leading: Icon(Icons.logout),
+  title: const Text('Đăng xuất'),
+  onTap: () async {
+    Navigator.pop(context); // Đóng modal trước khi thực hiện logout
+
+    // Gọi API logout
+    final response = await _loginService.logout();
+
+    if (response['status'] == 'success') {
+      // Xóa token và userId đã lưu, điều hướng đến màn hình đăng nhập
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (Route<dynamic> route) => false,
+      );
+    } else {
+      // Thông báo lỗi nếu logout thất bại
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'])),
+      );
+    }
+  },
+),
+
         ],
       ),
     );
