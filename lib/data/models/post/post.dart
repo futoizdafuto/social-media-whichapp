@@ -61,7 +61,7 @@ class Media {
   factory Media.fromJson(Map<String, dynamic> json) {
     return Media(
       mediaId: json['media_id'] ?? 0,
-      mediaUrl: json['media_url'] ?? '',
+      mediaUrl: json['url'] ?? '',
       type: json['type'] ?? 'image', // Mặc định là 'image' nếu không có
     );
   }

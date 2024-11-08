@@ -12,6 +12,7 @@ import '../../data/repository/user_repository.dart';
 import '../../data/repository/post_repository.dart';
 import '../media_gallery/media.dart';
 import '../settings_modal/setting_item.dart';
+import 'package:video_player/video_player.dart';
 
 class Posts extends StatefulWidget {
   const Posts({super.key});
@@ -25,19 +26,20 @@ class _PostsState extends State<Posts> {
   final PostRepository postRepository =
       PostRepository(); // Khởi tạo PostRepository.
   late Future<List<Post>> posts;
-
-  final UserRepository userRepository = UserRepository();
+  late final UserRepository userRepository = UserRepository();
   late Future<List<User>> users;
-
+  String token =
+      'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwZV9wZWFuNSIsImlhdCI6MTczMDk0ODM0NCwiZXhwIjoxNzMyMjQ0MzQ0fQ.sxxGM5W6uPH-ZQz6bQ61hBhtmcmsOoyWeKnAL55gVnzg6lvx82bhlxC7yJfGkA5YA3idyVLc3GO54flBgTjENg';
   @override
   void initState() {
     super
         .initState(); // Gọi initState() của lớp cha (State) để đảm bảo các thiết lập hệ thống được thực hiện.
-    posts = postRepository
-        .fetchPost(); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
+    posts = postRepository.fetchPost(
+        token); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
     users = userRepository.fetchUser();
   }
 
+  // trạng thái active cho nút like
   bool isActive = false; // Trạng thái của icon
   // Hàm xử lý sự kiện khi chọn Setting
   static void _handleSetting(BuildContext context, String message) {
@@ -70,34 +72,39 @@ class _PostsState extends State<Posts> {
 
   // hàm để dựng giao diện bài viết
   Widget _buildPostCard(BuildContext context, Size size, Post post) {
+    if (post.mediaList.isNotEmpty) {
+      print("Media List: ${post.mediaList}");
+      print(post.mediaList[0].mediaId); // Nếu có ít nhất 1 phần tử
+    } else {
+      print("Media URL is null or mediaList is empty");
+    }
     return Column(
       children: [
         _buildHeadingPost(post),
         Container(
-          margin: const EdgeInsets.only(
-            top: 10,
-            bottom: 10,
-            left: 0.5,
-            right: 0.5,
-          ),
-          // padding: const EdgeInsets.all(14.0),
-          height: size.height * 0.40,
-          width: size.width,
-          decoration: BoxDecoration(
-            // color: Colors.red,
-            borderRadius: BorderRadius.circular(3),
+            margin: const EdgeInsets.only(
+              // top: 10,
+              bottom: 10,
+              left: 0.5,
+              right: 0.5,
+            ),
+            // padding: const EdgeInsets.all(14.0),
+            height: size.height * 0.40,
+            width: size.width,
+            decoration: BoxDecoration(
+              // color: Colors.red,
+              borderRadius: BorderRadius.circular(3),
 
-            // image: const DecorationImage(
-            //   image: AssetImage("assets/images/building-1.jpg"),
-            //   fit: BoxFit.cover,
-            // ),
-          ),
-          child: const Image(
-            image: AssetImage("assets/images/building-1.jpg"),
-            fit: BoxFit.cover,
-          ),
-          // child: MediaGallery(mediaList: post.mediaList),
-        ),
+              // image: const DecorationImage(
+              //   image: AssetImage("assets/images/building-1.jpg"),
+              //   fit: BoxFit.cover,
+              // ),
+            ),
+            child: MediaCard(
+              mediaList: post.mediaList,
+            )
+            // child: MediaGallery(mediaList: post.mediaList),
+            ),
 
         /// de phan reaction o day
         _buildReactionButton(post),
@@ -108,6 +115,7 @@ class _PostsState extends State<Posts> {
     );
   }
 
+  // hàm để hiển thị tên người dùng, avatar và nút setting
   Widget _buildHeadingPost(Post post) {
     return Container(
       margin: const EdgeInsets.only(
@@ -122,8 +130,9 @@ class _PostsState extends State<Posts> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(post.user.avatar_url),
+                  const CircleAvatar(
+                    backgroundImage: NetworkImage(
+                        "https://10.50.45.87:8443/uploads/f0728b38-28b0-428c-8a95-d40255ce7713ava1.jpeg"),
                     maxRadius: 16.0,
                   ),
                   const SizedBox(width: 8.0),
@@ -131,7 +140,7 @@ class _PostsState extends State<Posts> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "futolatoine",
+                        post.user.user_name,
                         style: Theme.of(context)
                             .textTheme
                             .labelSmall!
@@ -219,6 +228,7 @@ class _PostsState extends State<Posts> {
     );
   }
 
+  // hàm hiển thị phần content( text ) của bài viết
   Widget _buildPostContent(Post post) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -240,4 +250,9 @@ class _PostsState extends State<Posts> {
       ),
     );
   }
+  // @override
+  // void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  //   super.debugFillProperties(properties);
+  //   properties.add(IterableProperty<String>('mediaList', mediaList));
+  // }
 }

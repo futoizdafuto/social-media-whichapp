@@ -1,11 +1,28 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'config/colors.dart';
+import 'config/myHttpOverrides.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/login/login_screen.dart';
 
+
+import 'package:http/http.dart' as http;
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    // Tạo một HTTP client mới với cấu hình bỏ qua chứng chỉ SSL
+    final client = super.createHttpClient(context);
+    client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    return client;
+  }
+}
+
 void main() {
+ allowSelfSignedCertificate();
   runApp(const MyApp());
 }
 
