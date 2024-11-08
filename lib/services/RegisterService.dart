@@ -3,7 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class RegisterService {
-  static const _baseUrl = 'https://192.168.100.252:8443/api/users';
+
+   static const _baseUrl = 'https://192.168.100.252:8443/api/users';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> register(String username, String password, String email, String name) async {
