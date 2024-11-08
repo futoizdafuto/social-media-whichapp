@@ -5,7 +5,7 @@ import '../models/post/post.dart';
 
 class PostRepository {
   // final String api_url = 'https://10.0.2.2:8443/api/posts';
-  final String api_url = 'https://192.168.149.91:8443/api/posts';
+  final String api_url = 'https://192.168.100.252:8443/api/posts';
 
 
   Future<List<Post>> fetchPost(String token) async {
