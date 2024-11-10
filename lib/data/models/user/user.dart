@@ -22,6 +22,8 @@ class User {
       required this.name,
       required this.post});
 
+      
+
 // tọa 1 đối tượng user từ JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
