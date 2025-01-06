@@ -3,7 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class LoginService {
-  static const _baseUrl = 'https://192.168.100.228:8443/api/users';
+  // static const _baseUrl = 'https://192.168.100.228:8443/api/users';
+  static const _baseUrl = 'https://10.150.105.205:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -97,6 +98,29 @@ Future<Map<String, dynamic>> reLogin(String token) async {
         'message': responseData['logout']['message'] ?? 'Logout failed'
       };
     }
+  } catch (e) {
+    return {'status': 'error', 'message': 'Lỗi kết nối: $e'};
+  }
+}
+Future<Map<String, dynamic>> loginWithGoogle() async {
+  final url = Uri.parse('$_baseUrl/oauth2/callback/google'); // Cập nhật endpoint chính xác
+  try {
+    final response = await http.post(url);
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+
+      if (responseData['login']['status'] == 'success') {
+        String token = responseData['login']['token']['token'];
+        String userId = responseData['login']['data']['user']['id'].toString();
+
+        await _storage.write(key: 'token', value: token);
+        await _storage.write(key: 'userId', value: userId);
+
+        return {'status': 'success', 'token': token, 'userId': userId};
+      }
+    }
+    return {'status': 'error', 'message': 'Đăng nhập Google thất bại'};
   } catch (e) {
     return {'status': 'error', 'message': 'Lỗi kết nối: $e'};
   }

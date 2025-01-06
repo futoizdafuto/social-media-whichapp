@@ -50,6 +50,20 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+void _handleGoogleLogin() async {
+  final result = await _loginService.loginWithGoogle();
+
+  if (result['status'] == 'success') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Nav()),
+    );
+  } else {
+    setState(() {
+      _errorMessage = result['message'];
+    });
+  }
+}
 
     void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -206,15 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // Nút đăng nhập bằng Google
                     GestureDetector(
-                      onTap: () {
-                        // Điều hướng đến trang Nav
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => const Nav(),
-                        //   ),
-                        // );
-                      },
+                     onTap: _handleGoogleLogin,
                       child: Container(
                         width: size.width * 0.75,
                         height: 55.0,
