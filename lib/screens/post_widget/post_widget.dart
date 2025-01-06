@@ -28,12 +28,14 @@ class _PostsState extends State<Posts> {
   late Future<List<Post>> posts;
   late final UserRepository userRepository = UserRepository();
   late Future<List<User>> users;
-  
+
   @override
   void initState() {
     super
         .initState(); // Gọi initState() của lớp cha (State) để đảm bảo các thiết lập hệ thống được thực hiện.
-    posts = postRepository.fetchPost(); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
+
+    posts = postRepository
+        .fetchPost(); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
     // users = userRepository.fetchUser();
   }
 
@@ -70,25 +72,19 @@ class _PostsState extends State<Posts> {
 
   // hàm để dựng giao diện bài viết
   Widget _buildPostCard(BuildContext context, Size size, Post post) {
-    if (post.mediaList.isNotEmpty) {
-      print("Media List: ${post.mediaList}");
-      print(post.mediaList[0].mediaId); // Nếu có ít nhất 1 phần tử
-    } else {
-      print("Media URL is null or mediaList is empty");
-    }
     return Column(
       children: [
         _buildHeadingPost(post),
         Container(
             margin: const EdgeInsets.only(
-              // top: 10,
+              top: 10,
               bottom: 10,
               left: 0.5,
               right: 0.5,
             ),
             // padding: const EdgeInsets.all(14.0),
-            height: size.height * 0.40,
-            width: size.width,
+            // height: size.height * 0.40,
+            width: double.infinity,
             decoration: BoxDecoration(
               // color: Colors.red,
               borderRadius: BorderRadius.circular(3),
@@ -130,7 +126,7 @@ class _PostsState extends State<Posts> {
                 children: [
                   const CircleAvatar(
                     backgroundImage: NetworkImage(
-                        "https://10.50.45.87:8443/uploads/f0728b38-28b0-428c-8a95-d40255ce7713ava1.jpeg"),
+                        "https://192.168.1.9:8443/uploads/bcc02dc3-aa0f-4f96-90ce-04a538364230ava1.jpeg"),
                     maxRadius: 16.0,
                   ),
                   const SizedBox(width: 8.0),
@@ -145,7 +141,7 @@ class _PostsState extends State<Posts> {
                             .copyWith(color: k1Gray),
                       ),
                       Text(
-                        '2 hrs ago',
+                        post.createdAt.toIso8601String(),
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge!

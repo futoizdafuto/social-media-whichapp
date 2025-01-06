@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/data/repository/post_repository.dart';
 import 'package:socially_app_flutter_ui/screens/home/widgets/background.dart';
 import 'package:socially_app_flutter_ui/screens/notification/notification_screen.dart';
@@ -14,14 +15,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
+  final PostRepository postRepository =
+      PostRepository(); // Khởi tạo PostRepository.
+  late Future<List<Post>> posts;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        posts = postRepository.fetchPost(); // Gọi API `fetchPost`
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // firstly, we need to create a backround
     return Background(
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: kWhite,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: false,

@@ -6,6 +6,8 @@ import 'dart:async';
 import '../../config/colors.dart';
 import '../../data/models/post/post.dart';
 
+
+// bug khi slide qua ảnh thì video vẫn còn được bật
 class MediaCard extends StatefulWidget {
   const MediaCard({
     super.key,
@@ -196,20 +198,20 @@ class _MediaCardState extends State<MediaCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white.withOpacity(0.1),
+      color: kWhite,
       child: Center(
         child: GestureDetector(
           onHorizontalDragEnd: _onSwipe,
           onTap:
               _toggleControlsVisibility, // Hiện/ẩn điều khiển khi người dùng click vào
           child: SizedBox(
-            height: 800,
+            height: 350,
             width: double.infinity,
             child: Stack(
               fit: StackFit.expand,
               children: [
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
+                  duration: const Duration(milliseconds: 100),
                   transitionBuilder: (child, animation) {
                     return FadeTransition(opacity: animation, child: child);
                   },
@@ -225,6 +227,41 @@ class _MediaCardState extends State<MediaCard> {
       ),
     );
   }
+
+//   @override
+// Widget build(BuildContext context) {
+//   return Container(
+//     color: Colors.white.withOpacity(0.1),
+//     child: Center(
+//       child: GestureDetector(
+//         onHorizontalDragEnd: _onSwipe,
+//         onTap: _toggleControlsVisibility, // Hiện/ẩn điều khiển khi người dùng click vào
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min, // Cho phép Column chỉ chiếm không gian cần thiết
+//           children: [
+//             Stack(
+//               fit: StackFit.loose, // Cho phép Stack tự điều chỉnh kích thước theo nội dung
+//               children: [
+//                 AnimatedSwitcher(
+//                   duration: const Duration(milliseconds: 500),
+//                   transitionBuilder: (child, animation) {
+//                     return FadeTransition(opacity: animation, child: child);
+//                   },
+//                   child: _buildMediaContent(),
+//                 ),
+//                 if (_isVideo(widget.mediaList[_currentIndex].mediaUrl))
+//                   _buildMediaControls(), // Chỉ hiển thị control khi là video
+//               ],
+//             ),
+//             // Các phần khác như tiêu đề, phản hồi, nội dung bài viết
+//             _buildReactionButton(post),
+//             _buildPostContent(post),
+//           ],
+//         ),
+//       ),
+//     ),
+//   );
+// }
 
   Widget _buildMediaContent() {
     if (_isLoading) {
@@ -278,30 +315,41 @@ class _MediaCardState extends State<MediaCard> {
           : const SizedBox.shrink();
     }
 
-    return Image.network(
-      widget.mediaList[_currentIndex].mediaUrl,
-      key: ValueKey<String>('image_$_currentIndex'),
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 48),
-              const SizedBox(height: 16),
-              const Text(
-                'Failed to load image',
-                style: TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _retryCurrentMedia,
-                child: const Text('Retry'),
-              ),
-            ],
+    // Sử dụng ClipRect để cắt phần hình ảnh vượt quá chiều rộng và chiều cao của container
+    return ClipRect(
+      child: Align(
+        alignment: Alignment.center, // Căn giữa hình ảnh
+        child: SizedBox(
+          width: double.infinity, // Chiều rộng đầy đủ
+          height: 400, // Chiều cao cố định
+          child: Image.network(
+            widget.mediaList[_currentIndex].mediaUrl,
+            key: ValueKey<String>('image_$_currentIndex'),
+            fit: BoxFit.cover, // Hình ảnh sẽ tự động cắt để vừa với container
+            errorBuilder: (context, error, stackTrace) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        color: Colors.white, size: 48),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Failed to load image',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _retryCurrentMedia,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
