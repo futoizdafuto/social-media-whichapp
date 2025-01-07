@@ -27,12 +27,14 @@ class FollowerListScreen extends StatefulWidget {
   final String title;
   final List<Follower> followers;
   final List<Follower> suggestedUsers;
+  final bool showFollowButton; // New parameter
 
   const FollowerListScreen({
     Key? key,
     required this.title,
     required this.followers,
     required this.suggestedUsers,
+    this.showFollowButton = true, // Default is true (show Follow button)
   }) : super(key: key);
 
   @override
@@ -44,6 +46,8 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
 
   // Method to update the follower list when a user follows/unfollows someone
   Future<void> _toggleFollow(Follower follower) async {
+    if (!widget.showFollowButton) return; // If follow button is not visible, do nothing
+
     setState(() {
       follower.isFollowing = !follower.isFollowing; // Toggle the follow state
     });
@@ -128,14 +132,17 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
                 children: [
                   ...widget.followers.map((follower) => _buildFollowerTile(follower)),
                   Divider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('Gợi ý cho bạn',
+                  if (widget.suggestedUsers.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'Gợi ý cho bạn',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
-                        )),
-                  ),
+                        ),
+                      ),
+                    ),
                   ...widget.suggestedUsers.map((user) => _buildFollowerTile(user)),
                 ],
               ),
@@ -154,15 +161,16 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
       ),
       title: Text(follower.name),
       subtitle: Text(follower.subtitle),
-      trailing: widget.title == 'Followers'  // If the title is 'Followers', hide follow button
-          ? null // Don't show the follow button
-          : ElevatedButton(
+      trailing: widget.showFollowButton
+          ? ElevatedButton(
         onPressed: () => _toggleFollow(follower),
         style: ElevatedButton.styleFrom(
           backgroundColor: follower.isFollowing ? Colors.grey : Colors.blue,
         ),
         child: Text(follower.isFollowing ? 'Đã theo dõi' : 'Theo dõi'),
-      ),
+      )
+          : null, // Don't show button if showFollowButton is false
     );
   }
 }
+
