@@ -23,10 +23,18 @@ class LoginService {
         if (responseData['login']['status'] == 'success') {
           String token = responseData['login']['token']['token'];
           String userId = responseData['login']['data']['user']['id'].toString();
+          String userName = responseData['login']['data']['user']['name'];
+          String realuserName = responseData['login']['data']['user']['username'];
+          String avatarUrl = responseData['login']['data']['user']['avatar_url'] ?? '';
 
           await _storage.write(key: 'token', value: token);
           await _storage.write(key: 'userId', value: userId);
-          return {'status': 'success', 'token': token, 'userId': userId};
+          await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
+          await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
+          await _storage.write(key: 'realuserName', value: realuserName);
+
+
+          return {'status': 'success', 'token': token, 'userId': userId,'realuserName':realuserName, 'userName': userName, 'avatarUrl': avatarUrl};
         }
       }
       return {'status': 'error', 'message': 'Tài khoản hoặc mật khẩu không chính xác!'};
