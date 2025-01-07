@@ -67,6 +67,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final storage = FlutterSecureStorage();
     return await storage.read(key: 'realuserName');  // Assuming realUserName is saved under this key
   }
+  Future<List<Follower>> _fetchSuggestedUsers(List<String> originalFollowingList) async {
+    final followService = FollowService();
+    final Set<String> uniqueSuggestedUsers = {}; // Use Set to avoid duplicates
+    final List<Follower> suggestedUsers = [];
+
+    // Fetch the real username to avoid showing it in suggested users
+    final realUserName = await _getRealUserName();
+
+    // Add original following list and logged-in user to the exclusion set
+    final exclusionSet = Set<String>.from(originalFollowingList);
+    if (realUserName != null) {
+      exclusionSet.add(realUserName); // Add the logged-in user to the exclusion set
+    }
+
+    for (String username in originalFollowingList) {
+      final followData = await followService.getFollowUser(username);
+
+      if (followData['status'] == 'success') {
+        List<String> nestedFollowingList = List<String>.from(followData['following_list'] ?? []);
+        for (String nestedUser in nestedFollowingList) {
+          // Only add users who are not in the original following list and are not the logged-in user
+          // and are not already in the suggested users list
+          if (!exclusionSet.contains(nestedUser) && !uniqueSuggestedUsers.contains(nestedUser)) {
+            uniqueSuggestedUsers.add(nestedUser); // Add to exclusion to prevent duplication
+            suggestedUsers.add(
+              Follower(
+                name: nestedUser,
+                subtitle: "",
+                profileImageUrl: "https://via.placeholder.com/150",
+                isFollowing: false,
+              ),
+            );
+          }
+        }
+      } else {
+        print('Error fetching suggested users for @$username: ${followData['message']}');
+      }
+    }
+
+    return suggestedUsers;
+  }
+
 
   @override
   void initState() {
@@ -171,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   name: username,
                                   subtitle: "Đang theo dõi bạn",
                                   profileImageUrl: "https://via.placeholder.com/150",
-                                  isFollowing: true,
+                                  isFollowing: false,  // This flag does not affect the follow button
                                 );
                               }).toList();
 
@@ -181,7 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   builder: (context) => FollowerListScreen(
                                     title: 'Followers',
                                     followers: followedList,
-                                    suggestedUsers: [],
+                                    suggestedUsers: [], // You can keep suggested users empty for now
+                                    showFollowButton: false,  // Pass this flag as false
                                   ),
                                 ),
                               );
@@ -197,7 +240,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             final followData = await followService.getFollows();
 
                             if (followData['status'] == 'success') {
-                              List<Follower> followingList = List<String>.from(followData['following_list']).map((username) {
+                              List<String> originalFollowingList = List<String>.from(followData['following_list']);
+
+                              // Lấy danh sách gợi ý từ following_list
+                              List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowingList);
+
+                              List<Follower> followingUsers = originalFollowingList.map((username) {
                                 return Follower(
                                   name: username,
                                   subtitle: "Đang theo dõi",
@@ -211,8 +259,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => FollowerListScreen(
                                     title: 'Following',
-                                    followers: followingList,
-                                    suggestedUsers: [],
+                                    followers: followingUsers,
+                                    suggestedUsers: suggestedUsers,
+                                    showFollowButton: true, // Pass this flag as true
                                   ),
                                 ),
                               );
@@ -222,6 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                           child: Stat(title: 'Following', value: _followingCount),
                         ),
+
                       ],
                     ),
                   ),
