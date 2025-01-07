@@ -5,6 +5,7 @@ import 'package:socially_app_flutter_ui/screens/home/home_screen.dart';
 import 'package:socially_app_flutter_ui/screens/message/message_screen.dart';
 import 'package:socially_app_flutter_ui/screens/profile/profile_screen.dart';
 import 'package:socially_app_flutter_ui/screens/widgets/custom_button.dart';
+import 'package:socially_app_flutter_ui/screens/post/post_screen.dart';
 
 class Nav extends StatefulWidget {
   const Nav({Key? key}) : super(key: key);
@@ -20,7 +21,8 @@ class _NavState extends State<Nav> {
     const HomeScreen(),
     const MessageScreen(),
     const Text('Fav List'),
-    const ProfileScreen(),
+    const ProfileScreen(username: ''),
+    const PostScreen(),
   ];
 
   void _changePageTo(int index) {
@@ -38,16 +40,21 @@ class _NavState extends State<Nav> {
           ? null
           : CustomButton(
               child: SvgPicture.asset('assets/icons/plus.svg'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PostScreen()),
+                );
+              },
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _selectedIndex == 1
           ? null
           : Container(
-              height: 80.0,
+              height: 60.0,
               width: double.infinity,
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.only(top: 19.0),
+              alignment: Alignment.center,
+              // padding: const EdgeInsets.only(top: 19.0),
               decoration: BoxDecoration(
                 color: kWhite,
                 borderRadius: const BorderRadius.only(
@@ -65,7 +72,6 @@ class _NavState extends State<Nav> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-
                   // chuyển sang trang home
                   GestureDetector(
                     onTap: () => _changePageTo(0),

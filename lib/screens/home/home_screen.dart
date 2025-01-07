@@ -1,18 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/data/repository/post_repository.dart';
 import 'package:socially_app_flutter_ui/screens/home/widgets/background.dart';
 import 'package:socially_app_flutter_ui/screens/notification/notification_screen.dart';
+import '../../data/models/post/post.dart';
 import '../post_widget/post_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final PostRepository postRepository =
+      PostRepository(); // Khởi tạo PostRepository.
+  late Future<List<Post>> posts;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        posts = postRepository.fetchPost(); // Gọi API `fetchPost`
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // firstly, we need to create a backround
     return Background(
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: kWhite,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           centerTitle: false,
@@ -28,7 +49,14 @@ class HomeScreen extends StatelessWidget {
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 16.0),
+              padding: const EdgeInsets.only(left: 10.0),
+              child: IconButton(
+                onPressed: () {},
+                icon: SvgPicture.asset('assets/icons/search.svg'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
               child: IconButton(
                 onPressed: () {
                   // Thêm Navigator.push để chuyển trang
