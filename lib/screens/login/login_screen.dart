@@ -51,19 +51,26 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
 void _handleGoogleLogin() async {
-  final result = await _loginService.loginWithGoogle();
-
-  if (result['status'] == 'success') {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const Nav()),
-    );
-  } else {
+  try {
+    final result = await _loginService.loginWithGoogle();
+     
+    if (result['status'] == 'success') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Nav()),
+      );
+    } else {
+      setState(() {
+        _errorMessage = result['message'] ?? 'Lỗi đăng nhập Google';
+      });
+    }
+  } catch (e) {
     setState(() {
-      _errorMessage = result['message'];
+      _errorMessage = 'Lỗi kết nối khi đăng nhập Google: $e';
     });
   }
 }
+
 
     void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
