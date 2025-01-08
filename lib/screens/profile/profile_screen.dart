@@ -202,29 +202,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Stat(title: 'Posts', value: 35),
+                        // In your GestureDetector for Followers
                         GestureDetector(
                           onTap: () async {
                             final followService = FollowService();
                             final followData = await followService.getFollows();
 
                             if (followData['status'] == 'success') {
-                              List<Follower> followedList = List<String>.from(followData['followed_list']).map((username) {
-                                return Follower(
-                                  name: username,
-                                  subtitle: "Đang theo dõi bạn",
-                                  profileImageUrl: "https://via.placeholder.com/150",
-                                  isFollowing: false,  // This flag does not affect the follow button
-                                );
-                              }).toList();
+                              // Explicitly cast the lists to List<String> to avoid type errors
+                              List<String> followedList = List<String>.from(followData['followed_list']);
 
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => FollowerListScreen(
                                     title: 'Followers',
-                                    followers: followedList,
-                                    suggestedUsers: [], // You can keep suggested users empty for now
-                                    showFollowButton: false,  // Pass this flag as false
+                                    followers: followedList.map((username) {
+                                      return Follower(
+                                        name: username,
+                                        subtitle: "Đang theo dõi bạn",
+                                        profileImageUrl: "https://via.placeholder.com/150",
+                                        isFollowing: false,
+                                      );
+                                    }).toList(),
+                                    suggestedUsers: [],
+                                    showFollowButton: true,
+                                    followingList: List<String>.from(followData['following_list']), // Ensure this is cast too
                                   ),
                                 ),
                               );
@@ -234,6 +237,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                           child: Stat(title: 'Followers', value: _followedCount),
                         ),
+
+// In your GestureDetector for Following
                         GestureDetector(
                           onTap: () async {
                             final followService = FollowService();
@@ -242,7 +247,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             if (followData['status'] == 'success') {
                               List<String> originalFollowingList = List<String>.from(followData['following_list']);
 
-                              // Lấy danh sách gợi ý từ following_list
                               List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowingList);
 
                               List<Follower> followingUsers = originalFollowingList.map((username) {
@@ -261,7 +265,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     title: 'Following',
                                     followers: followingUsers,
                                     suggestedUsers: suggestedUsers,
-                                    showFollowButton: true, // Pass this flag as true
+                                    showFollowButton: true,
+                                    followingList: originalFollowingList, // Ensure this is cast too
                                   ),
                                 ),
                               );
@@ -271,6 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                           child: Stat(title: 'Following', value: _followingCount),
                         ),
+
 
                       ],
                     ),
