@@ -34,7 +34,7 @@ class _RegisterscreenState extends State<Registerscreen> {
 
       final registerService = RegisterService();
       final response = await registerService.register(username, password, email, name);
-
+      print(response);
       if (response['status'] == 'success') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đăng ký thành công!')),

@@ -8,7 +8,9 @@ import '../models/post/post.dart';
 class PostRepository {
   // final String api_url = 'https://10.0.2.2:8443/api/posts';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final String api_url = 'https://192.168.1.40:8443/api/posts';
+  final String api_url = 'https://192.168.100.228:8443/api/posts';
+  // final String api_url = 'https://10.150.105.205:8443/api/posts';
+  
 
 //   Future<List<Post>> fetchPost() async {
 //   String? token = await _storage.read(key: 'token');
@@ -96,3 +98,22 @@ class PostRepository {
     }
   }
 }
+
+
+  // void fetch() async {
+  //   var url = Uri.parse(
+  //       'https://10.51.74.195:8443/uploads/c76a6072-24d1-4df0-9558-022136ff03e4cat1.mp4');
+
+  //   try {
+  //     final response = await http.get(url);
+
+  //     if (response.statusCode == 200) {
+  //       print('Dữ liệu tải thành công!');
+  //     } else {
+  //       print('Lỗi: ${response.statusCode}  lõi đây nè');
+  //     }
+  //   } catch (e) {
+  //     print('Lỗi: $e');
+  //   }
+  // }
+
