@@ -33,11 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void _autoLogin() async {
     final oldToken = await _loginService.getToken();
     print('Token cũ khi khởi động: $oldToken'); // In token ra để kiểm tra
-
+    final name = await _loginService.getNameUser();
     if (oldToken != null) {
       final result = await _loginService.reLogin(oldToken);
       print('Kết quả reLogin: $result'); // Để kiểm tra response từ reLogin
-
+          print('Ten cua user: $name');
       if (result['status'] == 'success') {
         print('Re-login thành công với token mới: ${result['newToken']}');
         Navigator.pushReplacement(
@@ -53,8 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
 void _handleGoogleLogin() async {
   try {
     final result = await _loginService.loginWithGoogle();
-     
+       final name = await _loginService.getNameUser();
     if (result['status'] == 'success') {
+          print('Ten cua user: $name');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Nav()),
