@@ -33,6 +33,7 @@ class _PostsState extends State<Posts> {
   void initState() {
     super
         .initState(); // Gọi initState() của lớp cha (State) để đảm bảo các thiết lập hệ thống được thực hiện.
+
     posts = postRepository
         .fetchPost(); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
     // users = userRepository.fetchUser();
@@ -133,7 +134,7 @@ class _PostsState extends State<Posts> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.user.user_name,
+                        post.user.name,
                         style: Theme.of(context)
                             .textTheme
                             .labelSmall!
