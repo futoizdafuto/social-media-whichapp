@@ -21,7 +21,7 @@ class _NavState extends State<Nav> {
     const HomeScreen(),
     const MessageScreen(),
     const Text('Fav List'),
-    const ProfileScreen(),
+    const ProfileScreen(username: '',),
     const PostScreen(),
   ];
 
