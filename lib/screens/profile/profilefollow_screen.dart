@@ -3,9 +3,11 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/screens/profile/setting_profile/settinguser_profile_screen.dart';
 import 'package:socially_app_flutter_ui/screens/profile/widgets/profile_background.dart';
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/profile/widgets/stat.dart';
+import '../../services/BlockServices.dart';
 import '../../services/FollowServices.dart';
 import '../settings_modal/setting_item.dart';
 import 'followeruser_list_screen.dart';
@@ -35,7 +37,7 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
   // Thêm các biến để lưu trữ số lượng followers và following
   int _followingCount = 0;
   int _followedCount = 0;
-
+  bool _isBlocked = false;
   // Handle setting modal action
   static void _handleSetting(BuildContext context, String message) {
     Navigator.pop(context); // Close the modal
@@ -48,9 +50,28 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
       _selectedTab = tab;
     });
   }
+  void checkIfBlocked() async {
+    final blocksData = await BlockService().getBlock();  // Sử dụng BlockService
+    if (blocksData['status'] == 'success') {
+      final blockedUsers = blocksData['blocked_users'] as List;
+      if (blockedUsers.contains(widget.username)) {
+        setState(() {
+          _isBlocked = true;
+          _followingCount = 0;  // Đặt lại số lượng following
+          _followedCount = 0;   // Đặt lại số lượng followers
+        });
+      } else {
+        // Nếu không bị chặn, bạn có thể tiếp tục lấy thông tin bình thường
+        fetchFollowData();  // Lấy dữ liệu follow bình thường
+      }
+    }
+  }
 
   // Hàm lấy dữ liệu follow
+  // Hàm lấy dữ liệu follow
   void fetchFollowData() async {
+    if (_isBlocked) return;  // Nếu bị chặn, không thực hiện lấy dữ liệu follow
+
     final followService = FollowService();
 
     // Lấy thông tin follow cho người dùng theo username được truyền vào
@@ -65,6 +86,7 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
       print('Error: ${followData['message']}');
     }
   }
+
 
   Future<List<Follower>> _fetchSuggestedUsers(List<String> originalFollowingList) async {
     final followService = FollowService();
@@ -108,6 +130,8 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
     return suggestedUsers;
   }
 
+
+
   @override
   void initState() {
     super.initState();
@@ -116,6 +140,7 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
     _userNameFuture = Future.value(widget.username);  // Assign username directly
 
     fetchFollowData();  // Gọi hàm lấy dữ liệu follow khi khởi tạo
+    checkIfBlocked();
   }
 
 
@@ -137,10 +162,14 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => const SettingProfileScreen(),
+                    builder: (context) => SettingUserProfileScreen(
+                      username: widget.username, // Truyền username từ ProfileFollowScreen
+                       // Bạn có thể truyền thêm thông tin blockedUsers nếu cần
+                    ),
                   );
                 },
               ),
+
             ),
           ],
         ),
@@ -191,12 +220,21 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 4.0),
-                  Text(
+                  _isBlocked
+                      ? Text(
+                    'Đã bị chặn',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 16,
+                    ),
+                  )
+                      : Text(
                     '@$username',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 80.0),
 
+                  // Statistics Section
                   // Statistics Section
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50.0),
@@ -205,10 +243,9 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
                       children: [
                         Stat(title: 'Posts', value: 35),
                         GestureDetector(
-                          onTap: () async {
+                          onTap: _isBlocked ? null : () async {
                             final followService = FollowService();
                             final followData = await followService.getFollowUser(widget.username);
-
 
                             if (followData['status'] == 'success') {
                               List<Follower> followedList = List<String>.from(followData['followed_list']).map((username) {
@@ -216,7 +253,7 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
                                   name: username,
                                   subtitle: "Đang theo dõi bạn",
                                   profileImageUrl: "https://via.placeholder.com/150",
-                                  isFollowing: false,  // This flag does not affect the follow button
+                                  isFollowing: false,
                                 );
                               }).toList();
 
@@ -226,8 +263,8 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
                                   builder: (context) => FollowUserListScreen(
                                     title: 'Followers',
                                     followers: followedList,
-                                    suggestedUsers: [], // You can keep suggested users empty for now
-                                    showFollowButton: false, followingList: [],  // Pass this flag as false
+                                    suggestedUsers: [],
+                                    showFollowButton: false, followingList: [],
                                   ),
                                 ),
                               );
@@ -238,56 +275,47 @@ class _ProfileFollowScreenState extends State<ProfileFollowScreen> {
                           child: Stat(title: 'Followers', value: _followedCount),
                         ),
                         GestureDetector(
-                          onTap: () async {
-                            // Lấy tên người dùng hiện tại từ 'realUserName'
+                          onTap: _isBlocked ? null : () async {
                             final realUserName = widget.username;
 
                             final followService = FollowService();
                             final followData = await followService.getFollowUser(realUserName);
 
-                            // Print the entire response to see its structure
-                            print('Response from API: $followData');
-
                             if (followData['status'] == 'success') {
                               List<String> originalFollowingList = List<String>.from(followData['following_list']);
 
-                              // Lấy danh sách gợi ý từ following_list
                               List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowingList);
 
-                              // Tạo danh sách người dùng đã theo dõi
                               List<Follower> followingUsers = originalFollowingList.map((username) {
                                 return Follower(
                                   name: username,
                                   subtitle: "",
-                                  profileImageUrl: "https://via.placeholder.com/150", // Placeholder image URL
+                                  profileImageUrl: "https://via.placeholder.com/150",
                                   isFollowing: true,
                                 );
                               }).toList();
 
-                              // Chuyển đến màn hình 'FollowUserListScreen' để hiển thị danh sách theo dõi
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => FollowUserListScreen(
                                     title: 'Following',
-                                    followers: followingUsers,   // Truyền danh sách followers đã được tạo
-                                    suggestedUsers: suggestedUsers, // Truyền danh sách suggestedUsers
-                                    showFollowButton: true, followingList: [], // Cờ để hiển thị nút theo dõi
+                                    followers: followingUsers,
+                                    suggestedUsers: suggestedUsers,
+                                    showFollowButton: true, followingList: [],
                                   ),
                                 ),
                               );
                             } else {
-                              // If there's an error or status is not 'success'
                               print('Error fetching following data: ${followData['message']}');
                             }
                           },
-                          child: Stat(title: 'Following', value: _followingCount), // Stat widget hiển thị số lượng người theo dõi
+                          child: Stat(title: 'Following', value: _followingCount),
                         ),
-
-
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 50.0),
 
                   // Grid of Posts
