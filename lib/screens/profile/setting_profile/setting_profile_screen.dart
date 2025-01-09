@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
+import 'package:socially_app_flutter_ui/screens/profile/block_list_screen.dart';
+import 'package:socially_app_flutter_ui/services/BlockServices.dart';
 class SettingProfileScreen extends StatefulWidget {
   const SettingProfileScreen({Key? key}) : super(key: key);
 
@@ -14,6 +16,7 @@ class SettingProfileScreen extends StatefulWidget {
 class _SettingProfileScreenState extends State<SettingProfileScreen> {
   String _selectedTab = 'photos';
   final LoginService _loginService = LoginService();
+  final BlockService _blockService = BlockService();
   
 
 
@@ -88,10 +91,44 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
     }
   },
 ),
-
+          ListTile(
+            leading: const Icon(Icons.block),
+            title: const Text('Danh sách chặn'),
+            onTap: _navigateToBlockedList,
+),
         ],
       ),
     );
+  }
+  Future<void> _navigateToBlockedList() async {
+    // Close the modal before navigating
+    Navigator.pop(context);
+
+    // Call the BlockService API to get blocked users
+    final response = await _blockService.getBlock();
+
+    if (response['status'] == 'success') {
+      // Navigate to the blocked users screen and pass the blocked users list
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BlockedListScreen(
+            blockedUsers: List<String>.from(response['blocked_users']),
+            onUpdateBlockedUsers: (updatedList) {
+              // Optionally handle the updated list here if needed
+              setState(() {
+                // Update your blocked list if necessary
+              });
+            },
+          ),
+        ),
+      );
+    } else {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'])),
+      );
+    }
   }
 }
 
