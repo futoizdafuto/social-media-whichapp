@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
 
 class FollowService {
-   // static const _baseUrl = 'https://10.0.172.216:8443/api/users';
-  static const _baseUrl = 'https://192.168.1.40:8443/api/users';
+   static const _baseUrl = 'https://10.0.172.216:8443/api/users';
+  // static const _baseUrl = 'https://192.168.1.40:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final LoginService _loginService = LoginService();  // Instance of LoginService to use reLogin
@@ -288,7 +288,7 @@ class FollowService {
       };
     }
   }
-    Future<Map<String, dynamic>> getAllUsers() async {
+   Future<Map<String, dynamic>> getAllUsers() async {
      String? token = await _getValidToken();  // Get valid token
      if (token == null) {
        return {
@@ -340,5 +340,7 @@ class FollowService {
        };
      }
    }
+
+
 
 }
