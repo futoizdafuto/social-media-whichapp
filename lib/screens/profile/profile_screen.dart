@@ -6,6 +6,7 @@ import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/profile/widgets/profile_background.dart';
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/profile/widgets/stat.dart';
+import '../../services/BlockServices.dart';
 import '../../services/FollowServices.dart';
 import '../settings_modal/setting_item.dart';
 import 'setting_profile/setting_profile_screen.dart';
@@ -75,39 +76,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Fetch the real username to avoid showing it in suggested users
     final realUserName = await _getRealUserName();
 
-    // Add original following list and logged-in user to the exclusion set
-    final exclusionSet = Set<String>.from(originalFollowingList);
-    if (realUserName != null) {
-      exclusionSet.add(realUserName); // Add the logged-in user to the exclusion set
+    if (realUserName == null) {
+      return []; // Return an empty list if real username is not available
     }
 
-    for (String username in originalFollowingList) {
-      final followData = await followService.getFollowUser(username);
+    // Add original following list and logged-in user to the exclusion set
+    final exclusionSet = Set<String>.from(originalFollowingList);
+    exclusionSet.add(realUserName); // Add the logged-in user to the exclusion set
 
-      if (followData['status'] == 'success') {
-        List<String> nestedFollowingList = List<String>.from(followData['following_list'] ?? []);
-        for (String nestedUser in nestedFollowingList) {
-          // Only add users who are not in the original following list and are not the logged-in user
-          // and are not already in the suggested users list
-          if (!exclusionSet.contains(nestedUser) && !uniqueSuggestedUsers.contains(nestedUser)) {
-            uniqueSuggestedUsers.add(nestedUser); // Add to exclusion to prevent duplication
-            suggestedUsers.add(
-              Follower(
-                name: nestedUser,
-                subtitle: "",
-                profileImageUrl: "https://via.placeholder.com/150",
-                isFollowing: false,
-              ),
-            );
+    // Fetch blocked users of the real username
+    final blockService = BlockService();  // Assuming you have a BlockService
+    final blockData = await blockService.getBlock();
+    if (blockData['status'] == 'success') {
+      Map<String, List<String>> blockerAndBlocked = {};
+      var blockerAndBlockedData = blockData['blocker_and_blocked'];
+
+      if (blockerAndBlockedData is Map<String, dynamic>) {
+        // Safely cast the blocker_and_blocked data to Map<String, List<String>>
+        blockerAndBlockedData.forEach((blocker, blockedList) {
+          if (blockedList is List<dynamic>) {
+            blockerAndBlocked[blocker] = List<String>.from(blockedList);
           }
-        }
-      } else {
-        print('Error fetching suggested users for @$username: ${followData['message']}');
+        });
+
+        // Add all users that the realUserName has blocked to the exclusion set
+        blockerAndBlocked.forEach((blocker, blockedList) {
+          if (blocker == realUserName) {
+            exclusionSet.addAll(blockedList);  // Add the users blocked by realUserName
+          }
+        });
       }
+    } else {
+      print('Error fetching blocked users: ${blockData['message']}');
+    }
+
+    // Fetch the list of users who have blocked the real username
+    final blockListData = await blockService.getListBlock();
+    if (blockListData['status'] == 'success') {
+      Map<String, List<String>> blockerAndBlocked = {};
+      var blockerAndBlockedData = blockListData['blocker_and_blocked'];
+
+      if (blockerAndBlockedData is Map<String, dynamic>) {
+        blockerAndBlockedData.forEach((blocker, blockedList) {
+          if (blockedList is List<dynamic>) {
+            blockerAndBlocked[blocker] = List<String>.from(blockedList);
+          }
+        });
+
+        // Add all users that have blocked the realUserName to the exclusion set
+        blockerAndBlocked.forEach((blocker, blockedList) {
+          if (blockedList.contains(realUserName)) {
+            exclusionSet.add(blocker);  // Add the users who have blocked the realUserName
+          }
+        });
+      }
+    } else {
+      print('Error fetching list of blockers: ${blockListData['message']}');
+    }
+
+    // Fetch all users from the getAllUser endpoint (list of all usernames)
+    final userService = followService;  // Assuming you have a UserService to fetch all users
+    final allUsersData = await userService.getAllUsers();
+
+    if (allUsersData['status'] == 'success') {
+      List<String> allUsernames = List<String>.from(allUsersData['users'] ?? []);
+
+      // Loop through all users and add them to suggested users if they are not in the exclusion set
+      for (String username in allUsernames) {
+        // Only add users who are not in the exclusion set (following, blocked, or logged-in user)
+        if (!exclusionSet.contains(username) && !uniqueSuggestedUsers.contains(username)) {
+          uniqueSuggestedUsers.add(username); // Add to exclusion to prevent duplication
+
+          // Add the user to the suggested list
+          suggestedUsers.add(
+            Follower(
+              name: username,
+              subtitle: "",
+              profileImageUrl: "https://via.placeholder.com/150",
+              isFollowing: false,
+            ),
+          );
+        }
+      }
+    } else {
+      print('Error fetching all users: ${allUsersData['message']}');
     }
 
     return suggestedUsers;
   }
+
+
+
 
 
   @override
@@ -210,14 +269,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             if (followData['status'] == 'success') {
                               // Explicitly cast the lists to List<String> to avoid type errors
-                              List<String> followedList = List<String>.from(followData['followed_list']);
+                              List<String> originalFollowedList = List<String>.from(followData['followed_list']);
+                              List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowedList);
 
+                              // Navigate to the FollowerListScreen, passing followed users and suggested users
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => FollowerListScreen(
                                     title: 'Followers',
-                                    followers: followedList.map((username) {
+                                    followers: originalFollowedList.map((username) {
                                       return Follower(
                                         name: username,
                                         subtitle: "Đang theo dõi bạn",
@@ -225,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         isFollowing: false,
                                       );
                                     }).toList(),
-                                    suggestedUsers: [],
+                                    suggestedUsers: suggestedUsers,  // Pass the suggested users
                                     showFollowButton: true,
                                     followingList: List<String>.from(followData['following_list']), // Ensure this is cast too
                                   ),
@@ -238,6 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Stat(title: 'Followers', value: _followedCount),
                         ),
 
+
 // In your GestureDetector for Following
                         GestureDetector(
                           onTap: () async {
@@ -247,6 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             if (followData['status'] == 'success') {
                               List<String> originalFollowingList = List<String>.from(followData['following_list']);
 
+                              // Fetch suggested users based on the exclusion logic (following, blocked, real user)
                               List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowingList);
 
                               List<Follower> followingUsers = originalFollowingList.map((username) {
@@ -258,13 +321,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 );
                               }).toList();
 
+                              // Navigate to the FollowerListScreen, passing both following and suggested users
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => FollowerListScreen(
                                     title: 'Following',
                                     followers: followingUsers,
-                                    suggestedUsers: suggestedUsers,
+                                    suggestedUsers: suggestedUsers,  // Pass the suggested users
                                     showFollowButton: true,
                                     followingList: originalFollowingList, // Ensure this is cast too
                                   ),
@@ -275,7 +339,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }
                           },
                           child: Stat(title: 'Following', value: _followingCount),
-                        ),
+                        )
+
 
 
                       ],
