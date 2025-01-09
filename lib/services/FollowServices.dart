@@ -288,5 +288,57 @@ class FollowService {
       };
     }
   }
+    Future<Map<String, dynamic>> getAllUsers() async {
+     String? token = await _getValidToken();  // Get valid token
+     if (token == null) {
+       return {
+         'status': 'error',
+         'message': 'Failed to get valid token. Please log in again.',
+       };
+     }
+
+     final url = Uri.parse('$_baseUrl/usernames');  // Endpoint for usernames
+     try {
+       final headers = {
+         'Authorization': 'Bearer $token',  // Include the token in the header
+       };
+
+       final response = await http.get(url, headers: headers);  // Make the request
+
+       print("Response status: ${response.statusCode}");
+       print("Response body: ${response.body}");
+
+       if (response.statusCode == 200) {
+         final responseData = json.decode(response.body);
+
+         // Check if the response contains valid data
+         if (responseData != null) {
+           // Check if usernames are returned and format the response
+           List usernames = responseData; // As the response is an array of strings
+
+           return {
+             'status': 'success',
+             'message': 'Usernames fetched successfully.',
+             'users': usernames,
+           };
+         } else {
+           return {
+             'status': 'error',
+             'message': 'Failed to fetch usernames.',
+           };
+         }
+       } else {
+         return {
+           'status': 'error',
+           'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+         };
+       }
+     } catch (e) {
+       return {
+         'status': 'error',
+         'message': 'An error occurred: $e',
+       };
+     }
+   }
 
 }
