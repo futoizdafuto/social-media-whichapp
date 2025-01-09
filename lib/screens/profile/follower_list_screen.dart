@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:socially_app_flutter_ui/screens/profile/profilefollow_screen.dart';
 import '../../services/FollowServices.dart'; // Import FollowService
-import 'profile_screen.dart'; // Import ProfileScreen
 
 class Follower {
   final String name;
   final String subtitle;
   final String profileImageUrl;
   bool isFollowing;
+  final List<String> followingList;
+  final List<String> followedList;
 
   Follower({
     required this.name,
     required this.subtitle,
     required this.profileImageUrl,
+
     this.isFollowing = false,
+    this.followingList = const [],
+    this.followedList = const [],
   });
 
   factory Follower.fromJson(Map<String, dynamic> json) {
@@ -20,6 +25,8 @@ class Follower {
       name: json['name'] ?? '',
       subtitle: json['subtitle'] ?? '',
       profileImageUrl: json['profileImageUrl'] ?? '',
+      followingList: List<String>.from(json['following'] ?? []),
+      followedList: List<String>.from(json['followed'] ?? []),
     );
   }
 }
@@ -29,6 +36,7 @@ class FollowerListScreen extends StatefulWidget {
   final List<Follower> followers;
   final List<Follower> suggestedUsers;
   final bool showFollowButton;
+  final List<String> followingList; // Add this parameter
 
   const FollowerListScreen({
     Key? key,
@@ -36,11 +44,13 @@ class FollowerListScreen extends StatefulWidget {
     required this.followers,
     required this.suggestedUsers,
     this.showFollowButton = true,
+    required this.followingList, // Initialize this parameter
   }) : super(key: key);
 
   @override
   _FollowerListScreenState createState() => _FollowerListScreenState();
 }
+
 
 class _FollowerListScreenState extends State<FollowerListScreen> {
   final FollowService _followService = FollowService();
@@ -69,30 +79,34 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
   Future<void> _toggleFollow(Follower follower) async {
     if (!widget.showFollowButton) return;
 
-    setState(() {
-      follower.isFollowing = !follower.isFollowing;
-    });
+    // Kiểm tra nếu tài khoản trong following_list và followed_list có trùng nhau
+    final isFollowing = widget.followingList.contains(follower.name);
 
-    final targetUsername = follower.name;
-
-    if (follower.isFollowing) {
-      final result = await _followService.followUser(targetUsername);
-      if (result['status'] == 'error') {
+    // Nếu đã theo dõi thì thực hiện unfollow
+    if (isFollowing) {
+      final result = await _followService.unfollowUser(follower.name);
+      if (result['status'] == 'success') {
         setState(() {
-          follower.isFollowing = false;
+          widget.followingList.remove(follower.name); // Xóa khỏi danh sách following
+          follower.isFollowing = false; // Cập nhật trạng thái theo dõi
         });
+      } else {
         _showErrorDialog(result['message']);
       }
     } else {
-      final result = await _followService.unfollowUser(targetUsername);
-      if (result['status'] == 'error') {
+      // Nếu chưa theo dõi thì thực hiện follow
+      final result = await _followService.followUser(follower.name);
+      if (result['status'] == 'success') {
         setState(() {
-          follower.isFollowing = true;
+          widget.followingList.add(follower.name); // Thêm vào danh sách following
+          follower.isFollowing = true; // Cập nhật trạng thái theo dõi
         });
+      } else {
         _showErrorDialog(result['message']);
       }
     }
   }
+
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -171,12 +185,15 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
   }
 
   Widget _buildFollowerTile(Follower follower) {
+    // Kiểm tra nếu người dùng đã theo dõi hay chưa
+    bool isFollowing = widget.followingList.contains(follower.name);
+
     return GestureDetector(
       onTap: () => _showUserInfoModal(follower),
       child: ListTile(
         leading: GestureDetector(
           onTap: () {
-            // When tapping on profile image, show modal
+            // Khi bấm vào ảnh đại diện, hiển thị modal thông tin người dùng
             _showUserInfoModal(follower);
           },
           child: CircleAvatar(
@@ -184,7 +201,7 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
           ),
         ),
         title: GestureDetector(
-          onTap: () => _navigateToProfile(follower.name),
+          onTap: () => _navigateToProfile(follower),
           child: Text(
             follower.name,
             style: TextStyle(
@@ -196,23 +213,28 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
         subtitle: Text(follower.subtitle),
         trailing: widget.showFollowButton
             ? ElevatedButton(
-          onPressed: () => _toggleFollow(follower),
+          onPressed: () => _toggleFollow(follower), // Thực hiện toggle follow/unfollow
           style: ElevatedButton.styleFrom(
-            backgroundColor: follower.isFollowing ? Colors.grey : Colors.blue,
+            backgroundColor: isFollowing ? Colors.grey : Colors.blue,
           ),
-          child: Text(follower.isFollowing ? 'Đã theo dõi' : 'Theo dõi'),
+          child: Text(isFollowing ? 'Đã theo dõi' : 'Theo dõi'),
         )
             : null,
       ),
     );
   }
 
+
   // Define _navigateToProfile method here
-  void _navigateToProfile(String username) {
+  void _navigateToProfile(Follower follower) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfileScreen(username: username),  // Pass username here
+        builder: (context) => ProfileFollowScreen(
+          username: follower.name, // Pass the username to ProfileFollowScreen
+          followingList: follower.followingList,
+          followedList: follower.followedList,
+        ),  // Pass the full data
       ),
     );
   }
