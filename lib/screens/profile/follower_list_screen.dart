@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:socially_app_flutter_ui/screens/profile/profilefollow_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import '../../services/FollowServices.dart'; // Import FollowService
 
 class Follower {
@@ -14,7 +16,6 @@ class Follower {
     required this.name,
     required this.subtitle,
     required this.profileImageUrl,
-
     this.isFollowing = false,
     this.followingList = const [],
     this.followedList = const [],
@@ -37,6 +38,7 @@ class FollowerListScreen extends StatefulWidget {
   final List<Follower> suggestedUsers;
   final bool showFollowButton;
   final List<String> followingList; // Add this parameter
+  final List<Follower> waitingUsers; // Add the waitingUsers property here
 
   const FollowerListScreen({
     Key? key,
@@ -44,18 +46,20 @@ class FollowerListScreen extends StatefulWidget {
     required this.followers,
     required this.suggestedUsers,
     this.showFollowButton = true,
-    required this.followingList, // Initialize this parameter
+    required this.followingList,
+    required this.waitingUsers, // Pass the waitingUsers list to the constructor
   }) : super(key: key);
 
   @override
   _FollowerListScreenState createState() => _FollowerListScreenState();
 }
 
-
 class _FollowerListScreenState extends State<FollowerListScreen> {
   final FollowService _followService = FollowService();
   TextEditingController _searchController = TextEditingController();
   List<Follower> _filteredFollowers = [];
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
 
   @override
   void initState() {
@@ -107,7 +111,6 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
     }
   }
 
-
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -126,6 +129,7 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
     );
   }
 
+  // Show user info modal
   Future<void> _showUserInfoModal(Follower follower) async {
     final followService = FollowService();
     final userData = await followService.getFollowUser(follower.name);
@@ -179,11 +183,9 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
         },
       );
     } else {
-      // Handle error if the user data fetch fails
       print('Error fetching user data: ${userData['message']}');
     }
   }
-
   Widget _buildFollowerTile(Follower follower) {
     // Kiểm tra nếu người dùng đã theo dõi hay chưa
     bool isFollowing = widget.followingList.contains(follower.name);
@@ -224,8 +226,100 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
     );
   }
 
+  // New method to handle the follow request acceptance
+  Future<void> _handleFollowRequest(Follower user) async {
+    final realUserName = await _storage.read(key: 'realuserName');
 
-  // Define _navigateToProfile method here
+    if (realUserName == null) {
+      _showErrorDialog('User is not logged in. Please log in first.');
+      return;
+    }
+
+    // Show confirmation dialog
+    bool acceptRequest = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Yêu cầu theo dõi'),
+          content: Text('${user.name} đã gửi yêu cầu theo dõi bạn. Bạn có chấp nhận không?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Không'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Reject request
+              },
+            ),
+            TextButton(
+              child: Text('Có'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Accept request
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+
+    if (acceptRequest) {
+      final result = await _followService.updateStatus(realUserName, user.name);
+      if (result['status'] == 'success') {
+        setState(() {
+          widget.waitingUsers.remove(user); // Remove from waiting list
+          widget.followingList.add(user.name); // Add to following list
+        });
+      } else {
+        _showErrorDialog(result['message']);
+      }
+    } else {
+      final result = await _followService.unfollowUsed(user.name);
+      if (result['status'] == 'success') {
+        setState(() {
+          widget.waitingUsers.remove(user); // Remove from waiting list
+        });
+      } else {
+        _showErrorDialog(result['message']);
+      }
+    }
+
+    // Reload the page
+    setState(() {});
+  }
+
+  // Build the waiting user tile
+  Widget _buildWaitingUserTile(Follower user) {
+    return GestureDetector(
+      onTap: () => _navigateToProfile(user), // Navigate to profile when tapped
+      child: ListTile(
+        leading: GestureDetector(
+          onTap: () {
+            _showUserInfoModal(user); // Show user info when tapping on the image
+          },
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(user.profileImageUrl),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => _navigateToProfile(user),
+          child: Text(
+            user.name,
+            style: TextStyle(
+              color: Colors.blue,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+        subtitle: Text(user.subtitle),
+        trailing: ElevatedButton(
+          onPressed: () => _handleFollowRequest(user), // Handle the follow request when pressed
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+          ),
+          child: Text('Đang chờ bạn chấp nhận'),
+        ),
+      ),
+    );
+  }
+
   void _navigateToProfile(Follower follower) {
     Navigator.push(
       context,
@@ -234,7 +328,7 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
           username: follower.name, // Pass the username to ProfileFollowScreen
           followingList: follower.followingList,
           followedList: follower.followedList,
-        ),  // Pass the full data
+        ),
       ),
     );
   }
@@ -283,6 +377,20 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
                 child: ListView(
                   children: [
                     ...widget.followers.map((follower) => _buildFollowerTile(follower)),
+                    if (widget.waitingUsers.isNotEmpty) ...[
+                      Divider(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          'Gợi ý cho bạn - Đang chờ bạn chấp nhận',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                      ...widget.waitingUsers.map((user) => _buildWaitingUserTile(user)),
+                    ],
                     if (widget.suggestedUsers.isNotEmpty) ...[
                       Divider(),
                       Padding(
@@ -306,4 +414,5 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
       ),
     );
   }
+
 }
