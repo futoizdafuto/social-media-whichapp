@@ -68,6 +68,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final storage = FlutterSecureStorage();
     return await storage.read(key: 'realuserName');  // Assuming realUserName is saved under this key
   }
+  Future<List<Follower>> fetchWaitingUsers(String realUserName) async {
+    final followService = FollowService();
+    final List<Follower> waitingUsers = [];
+    // Lấy dữ liệu danh sách người dùng đang chờ từ API
+    final waitingUsersResponse = await followService.getWaitingUsers(realUserName);
+    if (waitingUsersResponse['status'] == 'success') {
+      // Lấy danh sách các tên người dùng đang chờ
+      List<String> waitingUsernames = List<String>.from(waitingUsersResponse['waiting_users'] ?? []);
+      // Duyệt qua danh sách người dùng đang chờ và thêm đối tượng Follower vào danh sách waitingUsers
+      for (String username in waitingUsernames) {
+        waitingUsers.add(
+          Follower(
+            name: username,
+            subtitle: "Đang chờ bạn chấp nhận",
+            profileImageUrl: "https://via.placeholder.com/150", // Thêm ảnh đại diện placeholder
+            isFollowing: false, // Điều này có thể thay đổi tùy vào trạng thái follow
+
+          ),
+        );
+      }
+
+      return waitingUsers;
+    } else {
+      print('Error fetching waiting users: ${waitingUsersResponse['message']}');
+      return [];
+    }
+  }
   Future<List<Follower>> _fetchSuggestedUsers(List<String> originalFollowingList) async {
     final followService = FollowService();
     final Set<String> uniqueSuggestedUsers = {}; // Use Set to avoid duplicates
@@ -161,7 +188,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       print('Error fetching all users: ${allUsersData['message']}');
     }
-
+    final waitingUsers = await fetchWaitingUsers(realUserName);
+    // Debug print: Show waiting users
+    print('Waiting users: ${waitingUsers.map((user) => user.name).toList()}');
+    // Remove the users who are in the waiting users list from the suggested users list
+    suggestedUsers.removeWhere((suggestedUser) {
+      return waitingUsers.any((waitingUser) => waitingUser.name == suggestedUser.name);
+    });
+    // Debug print: Show the final list of suggested users
+    print('Suggested users after removing waiting users: ${suggestedUsers.map((user) => user.name).toList()}');
     return suggestedUsers;
   }
 
@@ -271,34 +306,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Explicitly cast the lists to List<String> to avoid type errors
                               List<String> originalFollowedList = List<String>.from(followData['followed_list']);
                               List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowedList);
+                             // Fetch realUserName
+                              String? realUserName = await _getRealUserName();
+
+                               // Check if realUserName is not null before fetching waiting users
+                               if (realUserName != null) {
+                               List<Follower> waitingUsers = await fetchWaitingUsers(realUserName);
 
                               // Navigate to the FollowerListScreen, passing followed users and suggested users
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FollowerListScreen(
-                                    title: 'Followers',
-                                    followers: originalFollowedList.map((username) {
-                                      return Follower(
-                                        name: username,
-                                        subtitle: "Đang theo dõi bạn",
-                                        profileImageUrl: "https://via.placeholder.com/150",
-                                        isFollowing: false,
-                                      );
-                                    }).toList(),
-                                    suggestedUsers: suggestedUsers,  // Pass the suggested users
-                                    showFollowButton: true,
-                                    followingList: List<String>.from(followData['following_list']), // Ensure this is cast too
-                                  ),
-                                ),
-                              );
+                               Navigator.push(
+                                 context,
+                                 MaterialPageRoute(
+                                   builder: (context) => FollowerListScreen(
+                                     title: 'Followers',
+                                     followers: originalFollowedList.map((username) {
+                                       return Follower(
+                                         name: username,
+                                         subtitle: "Đang theo dõi bạn",
+                                         profileImageUrl: "https://via.placeholder.com/150",
+                                         isFollowing: false,
+                                       );
+                                     }).toList(),
+                                     suggestedUsers: suggestedUsers,  // Pass the suggested users
+                                     waitingUsers: waitingUsers,  // Pass the waiting users list
+                                     showFollowButton: true,
+                                     followingList: List<String>.from(followData['following_list']), // Ensure this is cast too
+                                   ),
+                                 ),
+                               );
+                               } else {
+                                 print('Error: realUserName is null');
+                               }
                             } else {
                               print('Error fetching followed data: ${followData['message']}');
                             }
                           },
                           child: Stat(title: 'Followers', value: _followedCount),
                         ),
-
 
 // In your GestureDetector for Following
                         GestureDetector(
@@ -330,7 +374,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     followers: followingUsers,
                                     suggestedUsers: suggestedUsers,  // Pass the suggested users
                                     showFollowButton: true,
-                                    followingList: originalFollowingList, // Ensure this is cast too
+                                    followingList: originalFollowingList, waitingUsers: [], // Ensure this is cast too
                                   ),
                                 ),
                               );
