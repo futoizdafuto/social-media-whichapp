@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
 
 class FollowService {
-   // static const _baseUrl = 'https://10.0.172.216:8443/api/users';
-  static const _baseUrl = 'https://192.168.1.40:8443/api/users';
+  static const _baseUrl = 'https://10.0.172.216:8443/api/users';
+  // static const _baseUrl = 'https://192.168.1.40:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final LoginService _loginService = LoginService();  // Instance of LoginService to use reLogin
@@ -288,5 +288,448 @@ class FollowService {
       };
     }
   }
+  Future<Map<String, dynamic>> unfollowUsed(String targetUsername) async {
+    final realUserName = await _storage.read(key: 'realuserName');
+    if (realUserName == null) {
+      return {
+        'status': 'error',
+        'message': 'User is not logged in. Please log in first.',
+      };
+    }
+
+    final token = await _getValidToken();
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    final url = Uri.parse('$_baseUrl/unfollow');
+    try {
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      // Log the token and headers for debugging
+      print("Token: $token");
+      print("Request Headers: $headers");
+
+      // Add token to the body
+      final body = {
+        'username': targetUsername,
+        'targetUsername': realUserName,
+        'token': token, // Add the token in the body as well
+      };
+
+      final response = await http.post(url, headers: headers, body: body);
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData != null && responseData['status'] == 'success') {
+          return {
+            'status': 'success',
+            'message': responseData['message'],
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to unfollow the user.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> getAllUsers() async {
+    String? token = await _getValidToken();  // Get valid token
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    final url = Uri.parse('$_baseUrl/usernames');  // Endpoint for usernames
+    try {
+      final headers = {
+        'Authorization': 'Bearer $token',  // Include the token in the header
+      };
+
+      final response = await http.get(url, headers: headers);  // Make the request
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Check if the response contains valid data
+        if (responseData != null) {
+          // Check if usernames are returned and format the response
+          List usernames = responseData; // As the response is an array of strings
+
+          return {
+            'status': 'success',
+            'message': 'Usernames fetched successfully.',
+            'users': usernames,
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': 'Failed to fetch usernames.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> getWaitingUsers(String userName) async {
+    try {
+      // Kiểm tra nếu người dùng không tồn tại hoặc chưa đăng nhập
+      final realUserName = await _storage.read(key: 'realuserName');
+      if (realUserName == null) {
+        return {
+          'status': 'error',
+          'message': 'User is not logged in. Please log in first.',
+        };
+      }
+
+      // Lấy token hợp lệ
+      String? token = await _getValidToken();
+      if (token == null) {
+        return {
+          'status': 'error',
+          'message': 'Failed to get valid token. Please log in again.',
+        };
+      }
+
+      // Truy vấn từ API với username và token
+      final url = Uri.parse('$_baseUrl/waitingusers?username=$realUserName');
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.get(url, headers: headers);
+
+      // Xử lý phản hồi từ server
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        if (responseData != null && responseData['status'] == 'success') {
+          List waitingUsersList = responseData['waiting_users'] ?? [];
+
+          return {
+            'status': 'success',
+            'message': 'Successfully fetched waiting users.',
+            'waiting_users': waitingUsersList,
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to fetch waiting users data.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> getWaitingUsed() async {
+    try {
+      // Kiểm tra nếu người dùng không tồn tại hoặc chưa đăng nhập
+      final realUserName = await _storage.read(key: 'realuserName');
+      if (realUserName == null) {
+        return {
+          'status': 'error',
+          'message': 'User is not logged in. Please log in first.',
+        };
+      }
+
+      // Lấy token hợp lệ
+      String? token = await _getValidToken();
+      if (token == null) {
+        return {
+          'status': 'error',
+          'message': 'Failed to get valid token. Please log in again.',
+        };
+      }
+
+      // Truy vấn từ API với username và token
+      final url = Uri.parse('$_baseUrl/waitingused?username=$realUserName');
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.get(url, headers: headers);
+
+      // Xử lý phản hồi từ server
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        if (responseData != null && responseData['status'] == 'success') {
+          List waitingUseredList = responseData['waiting_usered'] ?? [];
+
+          return {
+            'status': 'success',
+            'message': 'Successfully fetched waiting users.',
+            'waiting_usered': waitingUseredList,
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to fetch waiting users data.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> getUserStatus(String username) async {
+    final token = await _getValidToken();
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    final url = Uri.parse('$_baseUrl/status?username=$username');  // API endpoint để lấy status của người dùng
+    try {
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.get(url, headers: headers);
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData != null && responseData['status'] == 'success') {
+          return {
+            'status': 'success',
+            'message': responseData['message'],
+            'username': responseData['username'],
+            'private': responseData['private'],
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to fetch user status.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> updatePrivate(String username) async {
+    final token = await _getValidToken();
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    final url = Uri.parse('$_baseUrl/updatePrivate');  // Endpoint to update to private
+    try {
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final body = {
+        'username': username,
+      };
+
+      final response = await http.post(url, headers: headers, body: body);
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData != null && responseData['status'] == 'success') {
+          return {
+            'status': 'success',
+            'message': responseData['message'],
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to update profile to private.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> updatePublic(String username) async {
+    final token = await _getValidToken();
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    final url = Uri.parse('$_baseUrl/updatePublic');  // Endpoint to update to public
+    try {
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final body = {
+        'username': username,
+      };
+
+      final response = await http.post(url, headers: headers, body: body);
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData != null && responseData['status'] == 'success') {
+          return {
+            'status': 'success',
+            'message': responseData['message'],
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to update profile to public.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+  Future<Map<String, dynamic>> updateStatus(String username, String targetUsername) async {
+    // Kiểm tra nếu token hợp lệ (tương tự như trong phương thức updatePrivate)
+    final token = await _getValidToken();
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    final url = Uri.parse('$_baseUrl/updatestatus');  // Endpoint để cập nhật trạng thái mối quan hệ follow
+    try {
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final body = {
+        'username': username,
+        'targetUsername': targetUsername,
+        'token': token
+      };
+
+      // Gửi yêu cầu POST tới backend để cập nhật trạng thái follow
+      final response = await http.post(url, headers: headers, body: body);
+
+      // Kiểm tra mã trạng thái HTTP trả về
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Kiểm tra nếu phản hồi thành công
+        if (responseData != null && responseData['status'] == 'success') {
+          return {
+            'status': 'success',
+            'message': responseData['message'],
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to update follow status.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
+
+
+
 
 }
