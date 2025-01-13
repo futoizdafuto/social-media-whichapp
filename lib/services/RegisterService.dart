@@ -27,11 +27,16 @@ class RegisterService {
       final responseData = json.decode(response.body);
 
       if (responseData['register']['status'] == 'success') {
-        return {'status': 'success', 'message': 'Đăng ký thành công'};
+        String email = responseData['register']['email'].toString();
+        await _storage.write(key: 'email_register', value: email);
+        return {'status': 'success', 'message': 'Gửi mã xác thực thành công'};
+
       } else if (responseData['register']['message'] == 'Username already exists') {
         // Thêm điều kiện kiểm tra nếu username đã tồn tại
         return {'status': 'error', 'message': 'Tên tài khoản đã tồn tại'};
-      }
+      } else if (responseData['register']['message'] == 'Email already exists') {
+          return {'status': 'error', 'message': 'Email đã tồn tại'};
+        }
     }
     return {'status': 'error', 'message': 'Lỗi khi đăng ký'};
   } catch (e) {
@@ -39,4 +44,7 @@ class RegisterService {
   }
 }
 
+  Future<String?> getEmail() async {
+    return await _storage.read(key: 'email_register');
+  }
 }

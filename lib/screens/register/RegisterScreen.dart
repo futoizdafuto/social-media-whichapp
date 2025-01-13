@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
 import 'package:socially_app_flutter_ui/services/RegisterService.dart';
 
 import '../../config/colors.dart';
@@ -22,37 +24,60 @@ class _RegisterscreenState extends State<Registerscreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController(); // Name controller
+    final RegisterService _RegisterService = RegisterService();
   bool _isObscure = true;
   String? _errorMessage; // Để hiển thị thông báo lỗi
  // Hàm xử lý đăng ký
-  Future<void> handleRegister() async {
-    if (_formKey.currentState!.validate()) {
-      String username = _usernameController.text;
-      String password = _passwordController.text;
-      String email = _emailController.text;
-      String name = _nameController.text;
+Future<void> handleRegister() async {
+  if (_formKey.currentState!.validate()) {
+    String username = _usernameController.text;
+    String password = _passwordController.text;
+    String email = _emailController.text;
+    String name = _nameController.text;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+    // Hiển thị loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
 
-      final registerService = RegisterService();
-      final response = await registerService.register(username, password, email, name);
-      print(response);
-      if (response['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đăng ký thành công!')),
-        );
+    final registerService = RegisterService();
+    final response = await registerService.register(username, password, email, name);
 
+    // Tắt loading indicator
+    Navigator.pop(context);
+
+    // Kiểm tra trạng thái trả về từ API
+    if (response['status'] == 'success') {
+      // Lấy email từ FlutterSecureStorage
+      final emailRegister = await registerService.getEmail();
+      if (emailRegister != null) {
+        // Điều hướng sang màn hình VerifyOtpMailRegister
+        print(emailRegister);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
+            builder: (context) => VerifyOtpMailRegister(email: emailRegister),
           ),
         );
       } else {
-        setState(() {
-          _errorMessage = response['message'];
-        });
+        // Hiển thị thông báo lỗi nếu email không được lưu
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không tìm thấy email đăng ký!')),
+        );
       }
+    } else {
+      // Hiển thị thông báo lỗi (không chuyển trang)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'Đăng ký thất bại!')),
+      );
     }
   }
+}
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
