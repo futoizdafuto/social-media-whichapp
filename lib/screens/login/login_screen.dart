@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
 
 import '../../config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
@@ -224,7 +225,36 @@ void _handleGoogleLogin() async {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20.0),
+            
+
+
+    // Dòng hỏi chưa có tài khoản
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Quên mật khẩu?"),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const VerifyOtpMailRegister(email: "levuanhtuyet@gmail.com"),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Lấy lại mật khẩu',
+                            style: TextStyle(
+                              color: Colors.blue, // Màu của chữ Đăng ký
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+
+
 
                     // Nút đăng nhập bằng Google
                     GestureDetector(
@@ -263,7 +293,7 @@ void _handleGoogleLogin() async {
                       ),
                     ),
 
-                    const SizedBox(height: 20.0),
+          
 
                     // Dòng hỏi chưa có tài khoản
                     Row(
@@ -289,6 +319,7 @@ void _handleGoogleLogin() async {
                         ),
                       ],
                     ),
+
                   ],
                 ),
               ),
