@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/screens/profile/PostInProfileScreen.dart';
 import 'package:socially_app_flutter_ui/screens/profile/widgets/profile_background.dart';
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/profile/widgets/stat.dart';
@@ -10,6 +11,7 @@ import '../../services/BlockServices.dart';
 import '../../services/FollowServices.dart';
 import '../settings_modal/setting_item.dart';
 import 'setting_profile/setting_profile_screen.dart';
+import '../../data/repository/post_repository.dart';
 import 'follower_list_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -22,10 +24,14 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTab = 'photos';
   late Future<String?> _userNameFuture;
+  late List<dynamic> _posts = []; // Initialize the _posts variable
+  late List<dynamic>_imageList;
+
 
   // Thêm các biến để lưu trữ số lượng followers và following
   int _followingCount = 0;
   int _followedCount = 0;
+  int _postsCount = 0;
 
   // Handle setting modal action
   static void _handleSetting(BuildContext context, String message) {
@@ -62,12 +68,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print('Error: ${followData['message']}');
     }
   }
+  Future<void> fetchPostCount() async {
+    final postService = PostRepository();
+    final realUserName = await _getRealUserName(); // Lấy tên người dùng thực tế
+
+    if (realUserName != null) {
+      try {
+        // Gọi hàm getCountPostByUsername để lấy số lượng bài viết của người dùng
+        final postsResponse = await postService.getCountPostByUsername();
+
+        // Kiểm tra phản hồi từ API
+        if (postsResponse['status'] == 'success') {
+          // Lấy giá trị post_count từ phản hồi
+          int postCount = postsResponse['post_count'] ?? 0;
+
+          // Cập nhật số lượng bài viết trong state
+          setState(() {
+            _postsCount = postCount;  // Lưu số lượng bài viết vào biến _postsCount
+          });
+
+          print('Posts count: $_postsCount');
+        } else {
+          print('Error fetching posts: ${postsResponse['message']}');
+        }
+      } catch (e) {
+        print('Error fetching posts: $e');
+      }
+    } else {
+      print('Error: realUserName is null');
+    }
+  }
 
   // Function to fetch the real username from secure storage
   Future<String?> _getRealUserName() async {
     final storage = FlutterSecureStorage();
     return await storage.read(key: 'realuserName');  // Assuming realUserName is saved under this key
   }
+  Future<void> fetchImages() async {
+    final postService = PostRepository(); // Repository to handle API calls
+    final realUserName = await _getRealUserName(); // Fetch the real username from storage
+
+    if (realUserName != null) {
+      try {
+        final imagesResponse = await postService
+            .getImagesByUsername(); // Giả sử bạn đã tạo hàm getImagesByUsername
+        if (imagesResponse['status'] == 'success') {
+          setState(() {
+            _imageList =
+            List<Map<String, dynamic>>.from(imagesResponse['image_list']);
+          });
+          print('Images fetched successfully');
+        } else {
+          print('Error fetching images: ${imagesResponse['message']}');
+        }
+      } catch (e) {
+        print('Error fetching images: $e');
+      }
+    }
+  }
+  Future<void> fetchPosts() async {
+    final postService = PostRepository(); // Repository to handle API calls
+    final realUserName = await _getRealUserName(); // Fetch the real username from storage
+
+    if (realUserName != null) {
+      try {
+        // Call the API to fetch posts by username
+        final postsResponse = await postService.getPostsByUsername();
+
+        // Check the response status from the API
+        if (postsResponse['status'] == 'success') {
+          // Extract the list of posts and sort them by creation time (newest first)
+          List<dynamic> posts = postsResponse['posts'] ?? [];
+
+          // Sort posts by 'created_at' (descending order)
+          posts.sort((a, b) =>
+              DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
+
+          // Update the state with the fetched posts, extract image URLs
+          setState(() {
+            _posts = posts.map((post) {
+              // Extract the list of image URLs for each post
+              List<String> imageUrls = [];
+              final mediaList = post['mediaList'] ?? [];
+
+              for (var media in mediaList) {
+                if (media['type'] == 'image' && media['url'] != null) {
+                  imageUrls.add(media['url']); // Add image URLs to the list
+                }
+              }
+
+              return {
+                'post_id': post['post_id'],
+                'content': post['content'],
+                'created_at': post['created_at'],
+                'user': post['user'],
+                'image_urls': imageUrls, // Store the image URLs
+              };
+            }).toList(); // Map posts to include the image URLs
+          });
+
+          print('Posts fetched successfully: ${_posts.length} posts');
+        } else {
+          print('Error fetching posts: ${postsResponse['message']}');
+        }
+      } catch (e) {
+        print('Error fetching posts: $e');
+      }
+    } else {
+      print('Error: realUserName is null');
+    }
+  }
+
+
+
+
   Future<List<Follower>> fetchWaitingUsers(String realUserName) async {
     final followService = FollowService();
     final List<Follower> waitingUsers = [];
@@ -81,7 +195,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         waitingUsers.add(
           Follower(
             name: username,
-            subtitle: "Đang chờ bạn chấp nhận",
+            subtitle: "",
+            profileImageUrl: "https://via.placeholder.com/150", // Thêm ảnh đại diện placeholder
+            isFollowing: false, // Điều này có thể thay đổi tùy vào trạng thái follow
+
+          ),
+        );
+      }
+
+      return waitingUsers;
+    } else {
+      print('Error fetching waiting users: ${waitingUsersResponse['message']}');
+      return [];
+    }
+  }
+  Future<List<Follower>> fetchWaitingUsed() async {
+    final followService = FollowService();
+    final List<Follower> waitingUsers = [];
+    // Lấy dữ liệu danh sách người dùng đang chờ từ API
+    final waitingUsersResponse = await followService.getWaitingUsed();
+    if (waitingUsersResponse['status'] == 'success') {
+      // Lấy danh sách các tên người dùng đang chờ
+      List<String> waitingUsernames = List<String>.from(waitingUsersResponse['waiting_usered'] ?? []);
+      // Duyệt qua danh sách người dùng đang chờ và thêm đối tượng Follower vào danh sách waitingUsers
+      for (String username in waitingUsernames) {
+        waitingUsers.add(
+          Follower(
+            name: username,
+            subtitle: "",
             profileImageUrl: "https://via.placeholder.com/150", // Thêm ảnh đại diện placeholder
             isFollowing: false, // Điều này có thể thay đổi tùy vào trạng thái follow
 
@@ -189,15 +330,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print('Error fetching all users: ${allUsersData['message']}');
     }
     final waitingUsers = await fetchWaitingUsers(realUserName);
+    final waitingUsed = await fetchWaitingUsed();
     // Debug print: Show waiting users
     print('Waiting users: ${waitingUsers.map((user) => user.name).toList()}');
     // Remove the users who are in the waiting users list from the suggested users list
     suggestedUsers.removeWhere((suggestedUser) {
       return waitingUsers.any((waitingUser) => waitingUser.name == suggestedUser.name);
     });
+    suggestedUsers.removeWhere((suggestedUser) {
+      return waitingUsed.any((waitingUsered) => waitingUsered.name == suggestedUser.name);
+    });
     // Debug print: Show the final list of suggested users
     print('Suggested users after removing waiting users: ${suggestedUsers.map((user) => user.name).toList()}');
     return suggestedUsers;
+  }
+  void _navigateToPostDetail(BuildContext context, String imageUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Postinprofilescreen(postImage: imageUrl),
+      ),
+    );
   }
 
 
@@ -209,6 +362,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _userNameFuture = FlutterSecureStorage().read(key: 'userName');
     fetchFollowData();  // Gọi hàm lấy dữ liệu follow khi khởi tạo
+    fetchPostCount();
+    fetchImages();
+  }
+  void _showImageModal(BuildContext context, String imageUrl) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .width * 0.6,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      // Add edit functionality here
+                    },
+                    icon: Icon(Icons.edit),
+                    label: Text('Sửa bài viết'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      // Add delete functionality here
+                    },
+                    icon: Icon(Icons.delete),
+                    label: Text('Xóa bài viết'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -295,7 +520,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Stat(title: 'Posts', value: 35),
+                        Stat(title: 'Posts', value: _postsCount),
                         // In your GestureDetector for Followers
                         GestureDetector(
                           onTap: () async {
@@ -306,37 +531,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               // Explicitly cast the lists to List<String> to avoid type errors
                               List<String> originalFollowedList = List<String>.from(followData['followed_list']);
                               List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowedList);
-                             // Fetch realUserName
+                              // Fetch realUserName
                               String? realUserName = await _getRealUserName();
 
-                               // Check if realUserName is not null before fetching waiting users
-                               if (realUserName != null) {
-                               List<Follower> waitingUsers = await fetchWaitingUsers(realUserName);
+                              // Check if realUserName is not null before fetching waiting users
+                              if (realUserName != null) {
+                                List<Follower> waitingUsers = await fetchWaitingUsers(realUserName);
 
-                              // Navigate to the FollowerListScreen, passing followed users and suggested users
-                               Navigator.push(
-                                 context,
-                                 MaterialPageRoute(
-                                   builder: (context) => FollowerListScreen(
-                                     title: 'Followers',
-                                     followers: originalFollowedList.map((username) {
-                                       return Follower(
-                                         name: username,
-                                         subtitle: "Đang theo dõi bạn",
-                                         profileImageUrl: "https://via.placeholder.com/150",
-                                         isFollowing: false,
-                                       );
-                                     }).toList(),
-                                     suggestedUsers: suggestedUsers,  // Pass the suggested users
-                                     waitingUsers: waitingUsers,  // Pass the waiting users list
-                                     showFollowButton: true,
-                                     followingList: List<String>.from(followData['following_list']), // Ensure this is cast too
-                                   ),
-                                 ),
-                               );
-                               } else {
-                                 print('Error: realUserName is null');
-                               }
+                                List<Follower> waitingused = await fetchWaitingUsed();
+                                // Navigate to the FollowerListScreen, passing followed users and suggested users
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FollowerListScreen(
+                                      title: 'Followers',
+                                      followers: originalFollowedList.map((username) {
+                                        return Follower(
+                                          name: username,
+                                          subtitle: "Đang theo dõi bạn",
+                                          profileImageUrl: "https://via.placeholder.com/150",
+                                          isFollowing: false,
+                                        );
+                                      }).toList(),
+                                      suggestedUsers: suggestedUsers,  // Pass the suggested users
+                                      waitingUsers: waitingUsers,  // Pass the waiting users list
+                                      showFollowButton: true,
+                                      followingList: List<String>.from(followData['following_list']), waitingUsered: waitingused, // Ensure this is cast too
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                print('Error: realUserName is null');
+                              }
                             } else {
                               print('Error fetching followed data: ${followData['message']}');
                             }
@@ -350,12 +576,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             final followService = FollowService();
                             final followData = await followService.getFollows();
 
+
                             if (followData['status'] == 'success') {
                               List<String> originalFollowingList = List<String>.from(followData['following_list']);
 
                               // Fetch suggested users based on the exclusion logic (following, blocked, real user)
                               List<Follower> suggestedUsers = await _fetchSuggestedUsers(originalFollowingList);
-
+                              String? realUserName = await _getRealUserName();
+                              List<Follower> waitingused = await fetchWaitingUsed();
                               List<Follower> followingUsers = originalFollowingList.map((username) {
                                 return Follower(
                                   name: username,
@@ -374,7 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     followers: followingUsers,
                                     suggestedUsers: suggestedUsers,  // Pass the suggested users
                                     showFollowButton: true,
-                                    followingList: originalFollowingList, waitingUsers: [], // Ensure this is cast too
+                                    followingList: originalFollowingList, waitingUsered: waitingused, waitingUsers: [], // Ensure this is cast too
                                   ),
                                 ),
                               );
@@ -392,25 +620,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 50.0),
 
-                  // Grid of Posts
+// Grid of Posts
                   Padding(
                     padding: const EdgeInsets.all(13.0),
                     child: StaggeredGrid.count(
-                      crossAxisCount: 2,
+                      crossAxisCount: 2,  // Số cột trong grid
                       mainAxisSpacing: 14.0,
                       crossAxisSpacing: 14.0,
-                      children: [
-                        StaggeredGridTile.count(
+                      children: List.generate(_imageList.length, (index) {
+                        final image = _imageList[index]; // Lấy từng ảnh từ danh sách ảnh
+                        final imageUrl = image['image_url'] ?? '';  // Lấy URL ảnh
+
+                        return StaggeredGridTile.count(
                           crossAxisCellCount: 1,
                           mainAxisCellCount: 1.5,
+                            child: GestureDetector(
+                              onTap: () => _navigateToPostDetail(context, imageUrl),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(19.0),
                             child: Stack(
                               children: [
-                                Image.asset(
-                                  'assets/images/Rectangle-5.png',
+                                // Hiển thị ảnh nếu URL hợp lệ
+                                imageUrl.isNotEmpty
+                                    ? Image.network(
+                                  imageUrl,
                                   fit: BoxFit.cover,
-                                ),
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                )
+                                    : Container(color: Colors.grey), // Nếu không có ảnh, hiển thị container xám
                                 Positioned(
                                   top: 8,
                                   right: 8,
@@ -439,130 +677,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           ),
-                        ),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(19.0),
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  'assets/images/Rectangle-7.png',
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      // Gọi modal với các tham số tùy chỉnh
-                                      SettingsModal.show(
-                                        context,
-                                        items: [
-                                          SettingItem(
-                                            icon: Icons.edit,
-                                            title: 'Sửa bài viết',
-                                            onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
-                                          ),
-                                          SettingItem(
-                                            icon: Icons.delete,
-                                            title: 'Xóa bài viết',
-                                            onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                    icon: const Icon(Icons.more_vert, color: Colors.white),
-                                  ),
-                                ),
-                              ],
                             ),
-                          ),
-                        ),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1.5,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(19.0),
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  'assets/images/Rectangle-8.png',
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      // Gọi modal với các tham số tùy chỉnh
-                                      SettingsModal.show(
-                                        context,
-                                        items: [
-                                          SettingItem(
-                                            icon: Icons.edit,
-                                            title: 'Sửa bài viết',
-                                            onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
-                                          ),
-                                          SettingItem(
-                                            icon: Icons.delete,
-                                            title: 'Xóa bài viết',
-                                            onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                    icon: const Icon(Icons.more_vert, color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: 1,
-                          mainAxisCellCount: 1,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(19.0),
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  'assets/images/Rectangle-1.png',
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      // Gọi modal với các tham số tùy chỉnh
-                                      SettingsModal.show(
-                                        context,
-                                        items: [
-                                          SettingItem(
-                                            icon: Icons.edit,
-                                            title: 'Sửa bài viết',
-                                            onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
-                                          ),
-                                          SettingItem(
-                                            icon: Icons.delete,
-                                            title: 'Xóa bài viết',
-                                            onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                    icon: const Icon(Icons.more_vert, color: Colors.white),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                        );
+
+                      }),
                     ),
-                  ),
+                  )
+
+
+
+
                 ],
               ),
             );
@@ -571,6 +695,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
 }
 
 class ProfileImageClipper extends CustomClipper<Path> {
