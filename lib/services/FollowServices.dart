@@ -464,6 +464,65 @@ class FollowService {
       };
     }
   }
+  Future<Map<String, dynamic>> getWaitingUsed() async {
+    try {
+      // Kiểm tra nếu người dùng không tồn tại hoặc chưa đăng nhập
+      final realUserName = await _storage.read(key: 'realuserName');
+      if (realUserName == null) {
+        return {
+          'status': 'error',
+          'message': 'User is not logged in. Please log in first.',
+        };
+      }
+
+      // Lấy token hợp lệ
+      String? token = await _getValidToken();
+      if (token == null) {
+        return {
+          'status': 'error',
+          'message': 'Failed to get valid token. Please log in again.',
+        };
+      }
+
+      // Truy vấn từ API với username và token
+      final url = Uri.parse('$_baseUrl/waitingused?username=$realUserName');
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.get(url, headers: headers);
+
+      // Xử lý phản hồi từ server
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        if (responseData != null && responseData['status'] == 'success') {
+          List waitingUseredList = responseData['waiting_usered'] ?? [];
+
+          return {
+            'status': 'success',
+            'message': 'Successfully fetched waiting users.',
+            'waiting_usered': waitingUseredList,
+          };
+        } else {
+          return {
+            'status': 'error',
+            'message': responseData?['message'] ?? 'Failed to fetch waiting users data.',
+          };
+        }
+      } else {
+        return {
+          'status': 'error',
+          'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'message': 'An error occurred: $e',
+      };
+    }
+  }
   Future<Map<String, dynamic>> getUserStatus(String username) async {
     final token = await _getValidToken();
     if (token == null) {
