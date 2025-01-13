@@ -12,6 +12,7 @@ class Follower {
   final List<String> followingList;
   final List<String> followedList;
 
+
   Follower({
     required this.name,
     required this.subtitle,
@@ -37,8 +38,9 @@ class FollowerListScreen extends StatefulWidget {
   final List<Follower> followers;
   final List<Follower> suggestedUsers;
   final bool showFollowButton;
-  final List<String> followingList; // Add this parameter
-  final List<Follower> waitingUsers; // Add the waitingUsers property here
+  final List<String> followingList;
+  final List<Follower> waitingUsers;  // waitingUsers list
+  final List<Follower> waitingUsered;   // New waitingUsed list
 
   const FollowerListScreen({
     Key? key,
@@ -47,7 +49,8 @@ class FollowerListScreen extends StatefulWidget {
     required this.suggestedUsers,
     this.showFollowButton = true,
     required this.followingList,
-    required this.waitingUsers, // Pass the waitingUsers list to the constructor
+    required this.waitingUsers, required this.waitingUsered,
+       // Pass the waitingUsed list
   }) : super(key: key);
 
   @override
@@ -79,10 +82,75 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
           .toList();
     });
   }
+  Widget _buildWaitingUsedTile(Follower user) {
+    return GestureDetector(
+      onTap: () {
+        // Optionally navigate to the user's profile
+      },
+      child: ListTile(
+        leading: GestureDetector(
+          onTap: () {
+            // Optionally show user info modal
+          },
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(user.profileImageUrl),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () {
+            // Optionally navigate to the user's profile
+          },
+          child: Text(
+            user.name,
+            style: TextStyle(
+              color: Colors.blue,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+        subtitle: Text(user.subtitle),
+        trailing: ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+          ),
+          child: Text('Đang chờ chấp nhận'),
+        ),
+      ),
+    );
+  }
 
   Future<void> _toggleFollow(Follower follower) async {
     if (!widget.showFollowButton) return;
 
+    // Kiểm tra trạng thái tài khoản (có phải tài khoản riêng tư không)
+    final statusResponse = await _followService.getUserStatus(follower.name);
+
+    if (statusResponse['status'] == 'success') {
+      bool isPrivate = statusResponse['private']; // Kiểm tra xem tài khoản có ở chế độ riêng tư không
+
+      // Nếu tài khoản ở chế độ riêng tư, yêu cầu người dùng quyết định theo dõi
+      if (isPrivate) {
+        bool followConfirmed = await _showFollowConfirmationDialog(follower);
+
+        if (followConfirmed) {
+          // Nếu người dùng đồng ý theo dõi, thực hiện thao tác chờ chấp nhận
+          setState(() async {
+            await _followUser(follower);
+            follower.isFollowing = false; // Đánh dấu là đang chờ chấp nhận
+            widget.waitingUsers.add(follower); // Thêm vào danh sách người đang chờ chấp nhận
+          });
+        }
+      } else {
+        // Nếu tài khoản không ở chế độ riêng tư, theo dõi ngay lập tức
+        await _followUser(follower);
+      }
+    } else {
+      _showErrorDialog(statusResponse['message']);
+    }
+  }
+
+  Future<void> _followUser(Follower follower) async {
     // Kiểm tra nếu tài khoản trong following_list và followed_list có trùng nhau
     final isFollowing = widget.followingList.contains(follower.name);
 
@@ -111,6 +179,11 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
     }
   }
 
+
+// Phần còn lại của hàm _followUser không thay đổi
+
+
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -127,6 +200,34 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
         ],
       ),
     );
+  }
+  // Hàm xử lý khi người dùng nhấn vào tài khoản chưa theo dõi
+
+  // Hiển thị hộp thoại xác nhận theo dõi
+  Future<bool> _showFollowConfirmationDialog(Follower follower) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Tài khoản riêng tư'),
+          content: Text('${follower.name} đang ở chế độ riêng tư. Bạn có muốn gửi yêu cầu theo dõi không?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Người dùng không đồng ý
+              },
+              child: Text('Không'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Người dùng đồng ý
+              },
+              child: Text('Có'),
+            ),
+          ],
+        );
+      },
+    ) ?? false; // Trả về false nếu người dùng đóng hộp thoại mà không chọn
   }
 
   // Show user info modal
@@ -390,6 +491,23 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
                         ),
                       ),
                       ...widget.waitingUsers.map((user) => _buildWaitingUserTile(user)),
+                    ],
+                    if (widget.waitingUsered.isNotEmpty) ...[
+                      Divider(),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+
+                        child: Text(
+                          'Gợi ý cho bạn - Đang chờ được chấp nhận (waitingUsed)',
+                          style: TextStyle(
+
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                      ...widget.waitingUsered.map((user) => _buildWaitingUsedTile(user)),  // Show waitingUsed list
                     ],
                     if (widget.suggestedUsers.isNotEmpty) ...[
                       Divider(),
