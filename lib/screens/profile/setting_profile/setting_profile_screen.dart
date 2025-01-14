@@ -9,8 +9,6 @@ import 'package:socially_app_flutter_ui/services/BlockServices.dart';
 import 'package:socially_app_flutter_ui/services/FollowServices.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
-
 class SettingProfileScreen extends StatefulWidget {
   const SettingProfileScreen({Key? key}) : super(key: key);
 
@@ -220,3 +218,4 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
 
 
 }
+

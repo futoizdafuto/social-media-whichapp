@@ -3,7 +3,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/screens/login/forgot_password_screen.dart';
 import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
-
 import '../../config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
 import 'widgets/login_widget.dart';
@@ -73,7 +72,6 @@ void _handleGoogleLogin() async {
     });
   }
 }
-
 
     void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -226,8 +224,6 @@ void _handleGoogleLogin() async {
                         ),
                       ),
                     ),
-            
-
 
     // Dòng hỏi chưa có tài khoản
                     Row(
@@ -294,7 +290,6 @@ void _handleGoogleLogin() async {
                       ),
                     ),
 
-          
 
                     // Dòng hỏi chưa có tài khoản
                     Row(
@@ -320,7 +315,6 @@ void _handleGoogleLogin() async {
                         ),
                       ],
                     ),
-
                   ],
                 ),
               ),

@@ -47,7 +47,6 @@ Future<Map<String, dynamic>> login(String username, String password) async {
   }
 }
 
-
 Future<Map<String, dynamic>> reLogin(String token) async {
   final url = Uri.parse('$_baseUrl/reLogin');
   try {
@@ -61,7 +60,6 @@ Future<Map<String, dynamic>> reLogin(String token) async {
       if (responseData['relogin']['status'] == 'success') {
         String newToken = responseData['relogin']['newToken'];
         await _storage.write(key: 'token', value: newToken); // Cập nhật lại token
-
         // Lưu lại thông tin mới của người dùng
         String userId = responseData['relogin']['data']['user']['id'].toString();
         String userName = responseData['relogin']['data']['user']['name'];
@@ -73,7 +71,6 @@ Future<Map<String, dynamic>> reLogin(String token) async {
         await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
         await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
         await _storage.write(key: 'realuserName', value: realuserName); // username
-
         return {'status': 'success', 'newToken': newToken};
       }
     }
@@ -135,7 +132,6 @@ Future<Map<String, dynamic>> reLogin(String token) async {
     return {'status': 'error', 'message': 'Lỗi kết nối: $e'};
   }
 }
-
 
 Future<Map<String, dynamic>> loginWithGoogle() async {
   final GoogleSignIn googleSignIn = GoogleSignIn(
