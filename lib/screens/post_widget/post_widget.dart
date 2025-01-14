@@ -133,7 +133,7 @@ class _PostsState extends State<Posts> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.user.user_name,
+                        post.user.name,
                         style: Theme.of(context)
                             .textTheme
                             .labelSmall!
@@ -185,7 +185,6 @@ class _PostsState extends State<Posts> {
   }
 
   // hàm build like và commenr
-
 Widget _buildReactionButton(Post post) {
   return Container(
     padding: const EdgeInsets.only(left: 10),

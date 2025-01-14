@@ -22,6 +22,7 @@ class Post {
       commentCount: 0, // Số lượng like mặc định là 
     );
   }
+
   Post({
     required this.postId,
     required this.user,
@@ -30,10 +31,12 @@ class Post {
     required this.createdAt,
     this.likeCount = 0, // Cung cấp giá trị mặc định nếu null
     this.commentCount = 0, // Cung cấp giá trị mặc định nếu null
+
   });
 
   // Tạo một đối tượng Post từ JSON
   factory Post.fromJson(Map<String, dynamic> json) {
+
   return Post(
     postId: json['post_id'] ?? 0, // Sử dụng giá trị mặc định nếu không có
     user: json['user'] != null ? User.fromJson(json['user']) : User.defaultUser(), // Kiểm tra null và sử dụng defaultUser nếu null
@@ -48,7 +51,6 @@ class Post {
     commentCount: json['comment_count'] ?? 0, // Nếu like_count là null, sử dụng 0
   );
 }
-
 
   // Chuyển đổi đối tượng Post thành JSON
   Map<String, dynamic> toJson() {
