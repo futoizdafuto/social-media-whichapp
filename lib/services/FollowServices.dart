@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
 
 class FollowService {
-  static const _baseUrl = 'https://10.0.172.216:8443/api/users';
+     static const _baseUrl = 'https://192.168.100.228:8443/api/users';
+  // static const _baseUrl = 'https://10.0.172.216:8443/api/users';
   // static const _baseUrl = 'https://192.168.1.40:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();

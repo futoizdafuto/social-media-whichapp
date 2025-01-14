@@ -4,67 +4,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/screens/login/verify_otp_forgot_password_screen.dart';
 import 'package:socially_app_flutter_ui/screens/register/widgets/register_widget.dart';
+import 'package:socially_app_flutter_ui/services/ForgotPasswordServices.dart';
 import 'package:socially_app_flutter_ui/services/VerifyOTPMailServices.dart';
 
-class VerifyOtpMailRegister extends StatefulWidget {
-  final String email;
-
-  const VerifyOtpMailRegister({
-    Key? key,
-    required this.email,
-  }) : super(key: key);
+class UpdatePasswordScreen extends StatefulWidget {
+ const UpdatePasswordScreen({Key? key}) : super(key: key);
 
   @override
-  State<VerifyOtpMailRegister> createState() => _VerifyOtpMailRegisterState();
+  State<UpdatePasswordScreen> createState() => _UpdatePasswordScreenState();
 }
 
-class _VerifyOtpMailRegisterState extends State<VerifyOtpMailRegister> {
+class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+    final TextEditingController _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isObscure = true;
 
-  int _secondsRemaining = 120; // 2 phút
-  late Timer _timer;
 
-  @override
-  void initState() {
-    super.initState();
-    _startCountdown();
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    _otpController.dispose();
-    super.dispose();
-  }
-
-  void _startCountdown() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_secondsRemaining > 0) {
-        setState(() {
-          _secondsRemaining--;
-        });
-      } else {
-        timer.cancel();
-      }
-    });
-  }
-
-Future<void> handleVerifyOtp() async {
+Future<void> handleVerifyEmail() async {
   if (_formKey.currentState!.validate()) {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
-    String otp = _otpController.text; // Lấy mã OTP từ TextFormField
+    String password = _passwordController.text; // Lấy mã OTP từ TextFormField
 
     // Gọi Verifyotpmailservices
-    final verifyService = Verifyotpmailservices();
-    final response = await verifyService.verifyOtp(otp);
+    final verifyEmailService = Forgotpasswordservices();
+    final response = await verifyEmailService.updatePassword(password);
 
     setState(() {
       _isLoading = false;
@@ -78,7 +50,7 @@ Future<void> handleVerifyOtp() async {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
+           builder: (context) => LoginScreen(),
         ),
       );
     } else {
@@ -98,7 +70,7 @@ Future<void> handleVerifyOtp() async {
     return RegisterBackground(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Xác thực Email'),
+          title: const Text('Lấy lại mật khẩu'),
           backgroundColor: k2MainThemeColor,
         ),
         backgroundColor: Colors.transparent, // Đặt nền trong suốt
@@ -113,31 +85,15 @@ Future<void> handleVerifyOtp() async {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Nhập mã OTP',
+                      'Nhập mật khẩu mới của bạn',
                       style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                             fontSize: 28.0,
                             fontWeight: FontWeight.bold,
                             color: const Color.fromARGB(255, 1, 16, 43),
                           ),
                     ),
-                    const SizedBox(height: 10.0),
-                    Text(
-                      'Đã gửi mã xác thực đến email:',
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.black54,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      widget.email,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                
+                
                     const SizedBox(height: 20.0),
                     if (_errorMessage != null)
                       Padding(
@@ -151,47 +107,78 @@ Future<void> handleVerifyOtp() async {
                       children: [
                         Expanded(
                           child: TextFormField(
-                            controller: _otpController,
-                            keyboardType: TextInputType.number,
+                            controller: _passwordController,
+                            obscureText: _isObscure,
                             decoration: InputDecoration(
-                              labelText: 'Mã OTP',
+                              labelText: 'Mật khẩu',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               filled: true,
                               fillColor: Colors.grey[100],
-                            ),
+                            suffixIcon: IconButton(
+                          icon: Icon(
+                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isObscure = !_isObscure;
+                            });
+                          },
+                        ),
+                      ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Không được để trống';
-                              } else if (value.length != 6) {
-                                return 'Phải có 6 chữ số';
-                              }
-                              return null;
+                               if (value == null || value.isEmpty) {
+                          return 'Mật khẩu không được để trống';
+                        } else if (value.length < 6) {
+                          return 'Mật khẩu phải có ít nhất 6 ký tự';
+                        } else if (!RegExp(r'(?=.*[0-9])').hasMatch(value)) {
+                          return 'Mật khẩu phải có ít nhất 1 chữ số';
+                        } else if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
+                          return 'Mật khẩu phải có ít nhất 1 ký tự viết hoa';
+                        }
+                        return null;
                             },
                           ),
                         ),
-                        const SizedBox(width: 10.0),
-                        SizedBox(
-                          width: 80,
-                          child: Text(
-                            _secondsRemaining > 0
-                                ? '$_secondsRemaining giây'
-                                : 'Hết giờ!',
-                            style: TextStyle(
-                              color: _secondsRemaining > 0
-                                  ? Colors.black
-                                  : Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
+                     
                       ],
                     ),
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 10.0),
+                        // Trường nhập lại mật khẩu
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      obscureText: _isObscure,
+                      decoration: InputDecoration(
+                        labelText: 'Nhập lại mật khẩu',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isObscure = !_isObscure; // Toggle password visibility
+                            });
+                          },
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value != _passwordController.text) {
+                          return 'Mật khẩu không khớp';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 10.0),
+
+
                     GestureDetector(
-                      onTap: _isLoading ? null : () => handleVerifyOtp(),
+                      onTap: _isLoading ? null : () => handleVerifyEmail(),
                       child: Container(
                         width: size.width * 0.75,
                         height: 55.0,
@@ -231,28 +218,7 @@ Future<void> handleVerifyOtp() async {
                               ),
                       ),
                     ),
-                    const SizedBox(height: 10.0),
-                    if (_secondsRemaining == 0)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _secondsRemaining = 120;
-                            _startCountdown();
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Đã gửi lại mã OTP!'),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Gửi lại mã OTP',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                
                   ],
                 ),
               ),

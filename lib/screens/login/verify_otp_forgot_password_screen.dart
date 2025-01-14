@@ -4,22 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/screens/login/update_password_screen.dart';
 import 'package:socially_app_flutter_ui/screens/register/widgets/register_widget.dart';
+import 'package:socially_app_flutter_ui/services/ForgotPasswordServices.dart';
 import 'package:socially_app_flutter_ui/services/VerifyOTPMailServices.dart';
 
-class VerifyOtpMailRegister extends StatefulWidget {
+class VerifyOtpForgotPasswordScreen extends StatefulWidget {
   final String email;
 
-  const VerifyOtpMailRegister({
+  const VerifyOtpForgotPasswordScreen({
     Key? key,
     required this.email,
   }) : super(key: key);
 
   @override
-  State<VerifyOtpMailRegister> createState() => _VerifyOtpMailRegisterState();
+  State<VerifyOtpForgotPasswordScreen> createState() => _VerifyOtpForgotPasswordScreenState();
 }
 
-class _VerifyOtpMailRegisterState extends State<VerifyOtpMailRegister> {
+class _VerifyOtpForgotPasswordScreenState extends State<VerifyOtpForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _otpController = TextEditingController();
   bool _isLoading = false;
@@ -64,7 +66,7 @@ Future<void> handleVerifyOtp() async {
 
     // Gọi Verifyotpmailservices
     final verifyService = Verifyotpmailservices();
-    final response = await verifyService.verifyOtp(otp);
+    final response = await verifyService.verifyOtpForgotPassword(otp);
 
     setState(() {
       _isLoading = false;
@@ -78,7 +80,7 @@ Future<void> handleVerifyOtp() async {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
+          builder: (context) => const UpdatePasswordScreen(),
         ),
       );
     } else {
