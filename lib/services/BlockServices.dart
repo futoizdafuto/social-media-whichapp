@@ -4,7 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class BlockService {
-  static const _baseUrl = 'https://10.0.172.216:8443/api/users';
+  // static const _baseUrl = 'https://10.0.172.216:8443/api/users';
+     static const _baseUrl = 'https://192.168.100.228:8443/api/users';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // A helper function to manage token retrieval

@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTab = 'photos';
   late Future<String?> _userNameFuture;
   late List<dynamic> _posts = []; // Initialize the _posts variable
-  late List<dynamic>_imageList;
+  late List<dynamic>_imageList = [];
 
 
   // Thêm các biến để lưu trữ số lượng followers và following

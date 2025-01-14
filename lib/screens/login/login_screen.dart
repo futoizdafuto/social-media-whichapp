@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/screens/login/forgot_password_screen.dart';
 import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
 
 import '../../config/colors.dart';
@@ -238,7 +239,7 @@ void _handleGoogleLogin() async {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const VerifyOtpMailRegister(email: "levuanhtuyet@gmail.com"),
+                                builder: (context) => const ForgotPasswordScreen(email: "levuanhtuyet@gmail.com"),
                               ),
                             );
                           },
