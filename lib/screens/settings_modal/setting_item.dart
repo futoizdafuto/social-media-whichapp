@@ -13,7 +13,8 @@ class SettingItem {
 // Modal Settings Widget
 class SettingsModal {
   // Hàm static để hiển thị modal với danh sách SettingItem động
-  static Future<void> show(BuildContext context, {required List<SettingItem> items}) async {
+  static Future<void> show(BuildContext context,
+      {required List<SettingItem> items}) async {
     return showModalBottomSheet(
       context: context,
       builder: (context) => _SettingsContent(items: items),
@@ -24,8 +25,6 @@ class SettingsModal {
 // Nội dung của Modal
 class _SettingsContent extends StatelessWidget {
   final List<SettingItem> items;
-
-  
 
   const _SettingsContent({required this.items});
 
@@ -38,7 +37,7 @@ class _SettingsContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Settings',
+            'Cài đặt',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -52,4 +51,3 @@ class _SettingsContent extends StatelessWidget {
     );
   }
 }
-

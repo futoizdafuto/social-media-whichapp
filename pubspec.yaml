@@ -28,15 +28,23 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
-    sdk: flutter
+     sdk: flutter
   flutter_staggered_grid_view: ^0.6.2
   flutter_svg: ^1.1.1+1
-  google_fonts: ^6.2.1
+  google_fonts: ^6.1.0 # downgraded version
   intl: ^0.17.0
-
+  cupertino_icons: ^1.0.2
+  http: ^1.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  flutter_secure_storage: ^5.0.0
+  video_player: ^2.9.2
+  provider: ^6.1.2
+  rxdart: ^0.27.0
+  web_socket_channel: ^2.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +56,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -64,6 +73,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/icons/google_logo.svg.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:provider/provider.dart';
+
+class NotificationService with ChangeNotifier {
+  // Stream để phát thông báo
+  final _notificationSubject = BehaviorSubject<String>();
+
+  // Stream getter để các widget có thể lắng nghe thông báo
+  Stream<String> get notificationStream => _notificationSubject.stream;
+
+  // Hàm để phát thông báo
+  void showNotification(String message) {
+    _notificationSubject.add(message);
+    notifyListeners(); // Thông báo cho các widget lắng nghe
+  }
+
+  // Đảm bảo giải phóng bộ nhớ
+  void dispose() {
+    _notificationSubject.close();
+    super.dispose();
+  }
+}
+
+
+
+class NotificationListenerPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Notification Listener Page'),
+      ),
+      body: Center(
+        child: Text('Page content here'),
+      ),
+    );
+  }
+
+  // Lắng nghe thông báo và hiển thị khi có thông báo mới
+  void listenForNotifications(BuildContext context) {
+    // Dùng Consumer để lắng nghe stream của NotificationService
+    Provider.of<NotificationService>(context, listen: false)
+        .notificationStream
+        .listen((message) {
+      // Hiển thị thông báo khi có message mới
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    });
+  }
+}
+
+class WebSocketNotificationPage extends StatefulWidget {
+  @override
+  _WebSocketNotificationPageState createState() =>
+      _WebSocketNotificationPageState();
+}
+
+class _WebSocketNotificationPageState
+    extends State<WebSocketNotificationPage> {
+  late WebSocketChannel channel;
+
+  @override
+  void initState() {
+    super.initState();
+    // Kết nối tới WebSocket
+    channel = WebSocketChannel.connect(Uri.parse('wss://192.168.1.10:8443/notification'));
+
+    // Lắng nghe thông báo từ WebSocket
+    channel.stream.listen((message) {
+      // Khi nhận được thông báo, gọi showNotification
+      Provider.of<NotificationService>(context, listen: false)
+          .showNotification(message);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    channel.sink.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('WebSocket Notifications')),
+      body: Center(child: Text('Listening for notifications...')),
+    );
+  }
+}
+

@@ -1,11 +1,42 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'config/colors.dart';
+import 'config/myHttpOverrides.dart';
 import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/login/login_screen.dart';
+import 'package:socially_app_flutter_ui/data/models/notification/notification_service';
+
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';  // Đảm bảo import trước
+import 'package:web_socket_channel/web_socket_channel.dart';  // Đảm bảo import trước
+
+
+
+
+import 'package:http/http.dart' as http;
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    // Tạo một HTTP client mới với cấu hình bỏ qua chứng chỉ SSL
+    final client = super.createHttpClient(context);
+    client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    return client;
+  }
+}
 
 void main() {
-  runApp(const MyApp());
+  HttpOverrides.global = MyHttpOverrides();
+ //allowSelfSignedCertificate();
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => NotificationService(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +48,7 @@ class MyApp extends StatelessWidget {
       title: 'Socially',
       debugShowCheckedModeBanner: false,
       theme: kAppThemeData,
-      home: const OnboardingScreen(),
+      home: const LoginScreen(),
       // home: SettingsWidget(),
     );
   }
