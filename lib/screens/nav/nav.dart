@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
+import 'package:socially_app_flutter_ui/screens/home/AdminPanelScreen.dart';
 import 'package:socially_app_flutter_ui/screens/home/home_screen.dart';
 import 'package:socially_app_flutter_ui/screens/message/message_screen.dart';
 import 'package:socially_app_flutter_ui/screens/profile/profile_screen.dart';
@@ -18,6 +19,7 @@ class _NavState extends State<Nav> {
   int _selectedIndex = 0;
 
   final _pages = [
+
     const HomeScreen(),
     const MessageScreen(),
     const Text('Fav List'),
