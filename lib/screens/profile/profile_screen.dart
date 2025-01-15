@@ -357,6 +357,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 
+  // Sample followers and suggested users for mockup purposes
+  final List<Follower> followers = [
+    Follower(
+      name: 'rosanween',
+      subtitle: 'Han Ngoc Dao',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: true,
+    ),
+    Follower(
+      name: 'yatih5127',
+      subtitle: 'HAYATI',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: true,
+    ),
+  ];
+
+  final List<Follower> suggestedUsers = [
+    Follower(
+      name: 'lidiasusanti884',
+      subtitle: 'Lidia Susanti',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: false,
+    ),
+    Follower(
+      name: 'sumirah9586',
+      subtitle: '@miratutut',
+      profileImageUrl: 'https://via.placeholder.com/150',
+      isFollowing: false,
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -683,14 +714,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }),
                     ),
                   )
-
-
-
-
                 ],
               ),
             );
           },
+        ),
+      ),
+      StaggeredGridTile.count(
+        crossAxisCellCount: 1,
+        mainAxisCellCount: 1,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(19.0),
+          child: Stack(
+            children: [
+              Image.asset(
+                'assets/images/Rectangle-1.png',
+                fit: BoxFit.cover,
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () {
+                    // Gọi modal với các tham số tùy chỉnh
+                    SettingsModal.show(
+                      context,
+                      items: [
+                        SettingItem(
+                          icon: Icons.edit,
+                          title: 'Sửa bài viết',
+                          onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
+                        ),
+                        SettingItem(
+                          icon: Icons.delete,
+                          title: 'Xóa bài viết',
+                          onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
+                        ),
+                      ],
+                    );
+                  },
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
+            ],
+          ),
         ),
       ),
     );

@@ -33,7 +33,6 @@ class _PostsState extends State<Posts> {
   void initState() {
     super
         .initState(); // Gọi initState() của lớp cha (State) để đảm bảo các thiết lập hệ thống được thực hiện.
-
     posts = postRepository
         .fetchPost(); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
     // users = userRepository.fetchUser();
@@ -186,41 +185,49 @@ class _PostsState extends State<Posts> {
   }
 
   // hàm build like và commenr
-
-  Widget _buildReactionButton(Post post) {
-    return Container(
-      padding: const EdgeInsets.only(
-        left: 10,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          PostStat(
-            iconPath: 'assets/icons/favorite_border.svg', // Icon chưa active
-            activeIconPath:
-                'assets/icons/favorite_heart.svg', // Icon khi active
-            value: '5.2K',
-            isLikeButton: true,
-            isActive: true,
-            onTap: () {
-              print("Liked the post!");
-              // print(post.img_url);
-            },
-          ),
-          PostStat(
-            iconPath: 'assets/icons/comments.svg',
-            activeIconPath: '', // Chỉ để tham khảo, không sử dụng
-            value: '1.1K',
-            isLikeButton: false,
-            onTap: () {
-              CommentModal.show(context);
-              print("Opened comments!");
-            },
-          ),
-        ],
-      ),
-    );
-  }
+Widget _buildReactionButton(Post post) {
+  return Container(
+    padding: const EdgeInsets.only(left: 10),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        PostStat(
+          iconPath: 'assets/icons/favorite_border.svg',
+          activeIconPath: 'assets/icons/favorite_heart.svg',
+          value: post.likeCount,
+          userId: post.user.user_id,
+          postId: post.postId, // Truyền ID bài viết
+          post: post,
+          onTap: () {
+            //print("Liked the post!");
+          },
+          isLikeButton: true,
+          isActive: false, // Gán trạng thái hiện tại nếu có
+        ),
+        PostStat(
+          iconPath: 'assets/icons/comments.svg',
+          activeIconPath: '',
+          value: post.commentCount,
+          userId: post.user.user_id,
+          postId: post.postId, // Truyền ID bài viết
+          post: post,
+          onTap: () {
+            CommentModal.show(
+              context, 
+              post, 
+              () {
+                setState(() {
+                  post.commentCount++; // Tăng số lượng bình luận lên
+                });
+              },
+            );
+          },
+          isLikeButton: false,
+        ),
+      ],
+    ),
+  );
+}
 
   // hàm hiển thị phần content( text ) của bài viết
   Widget _buildPostContent(Post post) {

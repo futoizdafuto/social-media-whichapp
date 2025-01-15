@@ -7,6 +7,21 @@ class Post {
   final String content;
   final List<Media> mediaList;
   final DateTime createdAt;
+  int likeCount;
+  int commentCount;
+
+// Phương thức tạo một Post với các giá trị mặc định
+  static Post defaultPost() {
+    return Post(
+      postId: 0, // Giá trị mặc định cho postId
+      user: User.defaultUser(), // Sử dụng user mặc định
+      content: '', // Chuỗi content mặc định
+      mediaList: [], // Danh sách media mặc định là rỗng
+      createdAt: DateTime.now(), // Thời gian tạo mặc định là thời điểm hiện tại
+      likeCount: 0, // Số lượng like mặc định là 0
+      commentCount: 0, // Số lượng like mặc định là 
+    );
+  }
 
   Post({
     required this.postId,
@@ -14,25 +29,28 @@ class Post {
     required this.content,
     required this.mediaList,
     required this.createdAt,
+    this.likeCount = 0, // Cung cấp giá trị mặc định nếu null
+    this.commentCount = 0, // Cung cấp giá trị mặc định nếu null
+
   });
 
   // Tạo một đối tượng Post từ JSON
   factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      postId: json['post_id'] ?? 0, // Giá trị mặc định nếu không có
-      user: json['user'] != null
-          ? User.fromJson(json['user'])
-          : User.defaultUser(),
-      content: json['content'] ?? '', // Giá trị mặc định nếu không có
-      mediaList: json['mediaList'] != null
-          ? List<Media>.from(
-              json['mediaList'].map((media) => Media.fromJson(media)))
-          : [], // Trả về danh sách rỗng nếu không có
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : DateTime.now(), // Giá trị mặc định là thời điểm hiện tại
-    );
-  }
+
+  return Post(
+    postId: json['post_id'] ?? 0, // Sử dụng giá trị mặc định nếu không có
+    user: json['user'] != null ? User.fromJson(json['user']) : User.defaultUser(), // Kiểm tra null và sử dụng defaultUser nếu null
+    content: json['content'] ?? '', // Nếu content là null, sử dụng chuỗi rỗng
+    mediaList: json['mediaList'] != null
+        ? List<Media>.from(json['mediaList'].map((media) => Media.fromJson(media)))
+        : [], // Nếu mediaList là null, sử dụng danh sách rỗng
+    createdAt: json['created_at'] != null
+        ? DateTime.parse(json['created_at'])
+        : DateTime.now(), // Nếu createdAt là null, sử dụng thời gian hiện tại
+    likeCount: json['like_count'] ?? 0, // Nếu like_count là null, sử dụng 0
+    commentCount: json['comment_count'] ?? 0, // Nếu like_count là null, sử dụng 0
+  );
+}
 
   // Chuyển đổi đối tượng Post thành JSON
   Map<String, dynamic> toJson() {
@@ -42,6 +60,8 @@ class Post {
       'content': content,
       'mediaList': mediaList.map((media) => media.toJson()).toList(),
       'created_at': createdAt.toIso8601String(),
+      'like_count': likeCount,
+      'comment_count': commentCount,
     };
   }
 }
