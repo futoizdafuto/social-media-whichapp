@@ -86,6 +86,9 @@ Future<Map<String, dynamic>> reLogin(String token) async {
   Future<String?> getToken() async {
     return await _storage.read(key: 'token');
   }
+    Future<String?> getUserId() async {
+    return await _storage.read(key: 'userId');
+  }
 
   Future<String?> getNameUser() async {
     return await _storage.read(key: 'userName');
