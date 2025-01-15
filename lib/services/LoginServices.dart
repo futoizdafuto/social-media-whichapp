@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:socially_app_flutter_ui/data/models/notification/notification.dart';
 
 class LoginService {
   static const _baseUrl = 'https://192.168.100.228:8443/api/users';
@@ -206,5 +207,22 @@ Future<Map<String, dynamic>> loginWithGoogle() async {
     return {'status': 'error', 'message': 'Lỗi Google Sign-In: $e'};
   }
 }
+Future<List<NotificationA>> getAllNotifications() async {
+  String? token = await _storage.read(key: 'token');
+  String? userId = await _storage.read(key: 'userId');
+  final response = await http.get(
+    Uri.parse('$_baseUrl/$userId/notifications'),  // Thay thế URL bằng URL của bạn
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
 
+  if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(response.body);
+      return jsonData.map((item) => NotificationA.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load notifications');
+    }
+}
 }

@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        posts = postRepository.fetchPost(); // Gọi API `fetchPost`
+        posts = postRepository.fetchPost(); // Gọi API fetchPost
       });
     });
   }
