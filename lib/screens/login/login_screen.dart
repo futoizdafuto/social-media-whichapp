@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:socially_app_flutter_ui/screens/login/forgot_password_screen.dart';
+import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
 import '../../config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
 import 'widgets/login_widget.dart';
@@ -33,11 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void _autoLogin() async {
     final oldToken = await _loginService.getToken();
     print('Token cũ khi khởi động: $oldToken'); // In token ra để kiểm tra
-
+    final name = await _loginService.getNameUser();
     if (oldToken != null) {
       final result = await _loginService.reLogin(oldToken);
       print('Kết quả reLogin: $result'); // Để kiểm tra response từ reLogin
-
+          print('Ten cua user: $name');
       if (result['status'] == 'success') {
         print('Re-login thành công với token mới: ${result['newToken']}');
         Navigator.pushReplacement(
@@ -53,8 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
 void _handleGoogleLogin() async {
   try {
     final result = await _loginService.loginWithGoogle();
-     
+       final name = await _loginService.getNameUser();
     if (result['status'] == 'success') {
+          print('Ten cua user: $name');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Nav()),
@@ -70,7 +72,6 @@ void _handleGoogleLogin() async {
     });
   }
 }
-
 
     void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -223,7 +224,34 @@ void _handleGoogleLogin() async {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20.0),
+
+    // Dòng hỏi chưa có tài khoản
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Quên mật khẩu?"),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ForgotPasswordScreen(email: "levuanhtuyet@gmail.com"),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Lấy lại mật khẩu',
+                            style: TextStyle(
+                              color: Colors.blue, // Màu của chữ Đăng ký
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+
+
 
                     // Nút đăng nhập bằng Google
                     GestureDetector(
@@ -262,7 +290,6 @@ void _handleGoogleLogin() async {
                       ),
                     ),
 
-                    const SizedBox(height: 20.0),
 
                     // Dòng hỏi chưa có tài khoản
                     Row(

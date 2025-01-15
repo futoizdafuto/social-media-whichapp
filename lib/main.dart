@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,6 +9,10 @@ import 'config/colors.dart';
 import 'config/myHttpOverrides.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/login/login_screen.dart';
+import 'package:socially_app_flutter_ui/data/models/notification/notification_service';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';  // Đảm bảo import trước
+import 'package:web_socket_channel/web_socket_channel.dart';  // Đảm bảo import trước
 import 'package:http/http.dart' as http;
 
 class MyHttpOverrides extends HttpOverrides {

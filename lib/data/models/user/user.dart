@@ -26,16 +26,23 @@ class User {
 
 // tọa 1 đối tượng user từ JSON
   factory User.fromJson(Map<String, dynamic> json) {
+    try {
     return User(
-        user_id: json['user_id'],
-        avatar_url: json['avatar_url'],
-        user_name: json['username'],
-        password: json['password'],
-        email: json['email'],
-        name: json['name'],
+        user_id: json['user_id']?? 0,
+        avatar_url: json['avatar_url'] ?? 'default_avatar_url.png',
+        user_name: json['username']?? 'Unknown',
+        password: json['password']?? 'Unknown',
+        email: json['email']?? 'Unknown',
+        name: json['name']?? 'Unknown',
         post: json['post'] != null
             ? List<Post>.from(json['post'].map((post) => Post.fromJson(json)))
             : []);
+    } catch (e) {
+      // Bắt lỗi nếu có bất kỳ vấn đề gì trong quá trình giải mã JSON
+      print("Error parsing User: $e");
+      // Trả về đối tượng Comment với dữ liệu mặc định khi có lỗi
+      return User(user_id: json['user_id'],avatar_url:json['avatar_url'] ,user_name: json['username'] ,password: json['password'], email: json['email'], name: json['name'], post: List<Post>.from(json['post'].map((post) => Post.fromJson(json))));
+    }
   }
 
 // chuyển đối tượng User thành Json

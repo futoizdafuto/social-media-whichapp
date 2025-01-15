@@ -532,5 +532,4 @@ class _FollowerListScreenState extends State<FollowerListScreen> {
       ),
     );
   }
-
 }
