@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTab = 'photos';
   late Future<String?> _userNameFuture;
   late List<dynamic> _posts = []; // Initialize the _posts variable
-  late List<dynamic>_imageList = [];
+  List<Map<String, dynamic>> _imageList = [];  // Khởi tạo giá trị mặc định
 
 
   // Thêm các biến để lưu trữ số lượng followers và following
@@ -344,11 +344,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     print('Suggested users after removing waiting users: ${suggestedUsers.map((user) => user.name).toList()}');
     return suggestedUsers;
   }
-  void _navigateToPostDetail(BuildContext context, String imageUrl) {
+  void _navigateToPostDetail(BuildContext context, String imageUrl, String username, String content, int postId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Postinprofilescreen(postImage: imageUrl),
+        builder: (context) => Postinprofilescreen(
+          postImage: imageUrl,
+          username: username,
+          content: content, postId: postId
+        ),
       ),
     );
   }
@@ -357,36 +361,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 
-  // Sample followers and suggested users for mockup purposes
-  final List<Follower> followers = [
-    Follower(
-      name: 'rosanween',
-      subtitle: 'Han Ngoc Dao',
-      profileImageUrl: 'https://via.placeholder.com/150',
-      isFollowing: true,
-    ),
-    Follower(
-      name: 'yatih5127',
-      subtitle: 'HAYATI',
-      profileImageUrl: 'https://via.placeholder.com/150',
-      isFollowing: true,
-    ),
-  ];
-
-  final List<Follower> suggestedUsers = [
-    Follower(
-      name: 'lidiasusanti884',
-      subtitle: 'Lidia Susanti',
-      profileImageUrl: 'https://via.placeholder.com/150',
-      isFollowing: false,
-    ),
-    Follower(
-      name: 'sumirah9586',
-      subtitle: '@miratutut',
-      profileImageUrl: 'https://via.placeholder.com/150',
-      isFollowing: false,
-    ),
-  ];
 
   @override
   void initState() {
@@ -395,6 +369,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     fetchFollowData();  // Gọi hàm lấy dữ liệu follow khi khởi tạo
     fetchPostCount();
     fetchImages();
+    fetchPosts();
   }
   void _showImageModal(BuildContext context, String imageUrl) {
     showModalBottomSheet(
@@ -655,18 +630,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.all(13.0),
                     child: StaggeredGrid.count(
-                      crossAxisCount: 2,  // Số cột trong grid
+                      crossAxisCount: 2, // Số cột trong grid
                       mainAxisSpacing: 14.0,
                       crossAxisSpacing: 14.0,
-                      children: List.generate(_imageList.length, (index) {
-                        final image = _imageList[index]; // Lấy từng ảnh từ danh sách ảnh
-                        final imageUrl = image['image_url'] ?? '';  // Lấy URL ảnh
+                      children: List.generate(_posts.length, (index) {
+                        // Lấy bài đăng từ danh sách bài viết
+                        final post = _posts[index];
+
+                        // Lấy URL ảnh từ danh sách hình ảnh trong bài đăng
+                        final imageUrls = post['image_urls'] ?? [];
+                        final imageUrl = imageUrls.isNotEmpty ? imageUrls[0] : ''; // Chọn ảnh đầu tiên nếu có
+
+                        final username = post['user']?['username'] ?? 'Unknown User'; // Lấy username
+                        final content = post['content'] ?? ''; // Lấy nội dung bài viết
+                        final postid = post["post_id"];
 
                         return StaggeredGridTile.count(
                           crossAxisCellCount: 1,
                           mainAxisCellCount: 1.5,
-                            child: GestureDetector(
-                              onTap: () => _navigateToPostDetail(context, imageUrl),
+                          child: GestureDetector(
+                            onTap: () => _navigateToPostDetail(context, imageUrl, username, content,postid),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(19.0),
                             child: Stack(
@@ -714,58 +697,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }),
                     ),
                   )
+
+
+
+
                 ],
               ),
             );
           },
-        ),
-      ),
-      StaggeredGridTile.count(
-        crossAxisCellCount: 1,
-        mainAxisCellCount: 1,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(19.0),
-          child: Stack(
-            children: [
-              Image.asset(
-                'assets/images/Rectangle-1.png',
-                fit: BoxFit.cover,
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton(
-                  onPressed: () {
-                    // Gọi modal với các tham số tùy chỉnh
-                    SettingsModal.show(
-                      context,
-                      items: [
-                        SettingItem(
-                          icon: Icons.edit,
-                          title: 'Sửa bài viết',
-                          onTap: () => _handleSetting(context, 'Sửa bài viết được chọn'),
-                        ),
-                        SettingItem(
-                          icon: Icons.delete,
-                          title: 'Xóa bài viết',
-                          onTap: () => _handleSetting(context, 'Xóa bài viết được chọn'),
-                        ),
-                      ],
-                    );
-                  },
-                  icon: const Icon(Icons.more_vert, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  ),
-),
-
-            ],
-          ),
         ),
       ),
     );
