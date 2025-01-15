@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:ffi';
+// import 'dart:ffi';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -13,7 +13,7 @@ class PostRepository {
   // final String api_url = 'https://10.0.2.2:8443/api/posts';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   // final String api_url = 'https://10.0.172.216:8443/api/posts';
-     final String api_url = 'https://192.168.100.228:8443/api/posts';
+     final String api_url = 'https://192.168.1.8:8443/api/posts';
   // final String api_url = 'https://10.150.105.205:8443/api/posts';
 
 

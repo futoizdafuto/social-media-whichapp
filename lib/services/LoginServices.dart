@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:socially_app_flutter_ui/data/models/notification/notification.dart';
 
 class LoginService {
-  static const _baseUrl = 'https://192.168.100.228:8443/api/users';
+  static const _baseUrl = 'https://192.168.1.8:8443/api/users';
   // static const _baseUrl = 'https://10.150.105.205:8443/api/users';
 
 
