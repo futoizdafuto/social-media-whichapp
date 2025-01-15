@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:socially_app_flutter_ui/screens/home/AdminPanelScreen.dart';
 import 'package:socially_app_flutter_ui/screens/login/forgot_password_screen.dart';
 import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
 import '../../config/colors.dart';
@@ -41,10 +42,20 @@ class _LoginScreenState extends State<LoginScreen> {
           print('Ten cua user: $name');
       if (result['status'] == 'success') {
         print('Re-login thành công với token mới: ${result['newToken']}');
+     if (result['role'] == 1) {
+        // Nếu role là 1, chuyển đến AdminPanelScreen
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Nav()), // Điều hướng tới màn hình chính
+          MaterialPageRoute(builder: (context) => AdminPanelScreen()),
         );
+      } else {
+        // Nếu role là 2, chuyển đến Nav
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Nav()),
+        );
+      }
+        // );
       } else {
         print('Re-login thất bại: ${result['message']}');
       }
@@ -73,25 +84,33 @@ void _handleGoogleLogin() async {
   }
 }
 
-    void _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      final username = _emailController.text;
-      final password = _passwordController.text;
+  void _handleLogin() async {
+  if (_formKey.currentState!.validate()) {
+    final username = _emailController.text;
+    final password = _passwordController.text;
 
-      final result = await _loginService.login(username, password);
-      if (result['status'] == 'success') {
+    final result = await _loginService.login(username, password);
+    if (result['status'] == 'success') {
+      int role = result['role'];
+
+      if (role == 1) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AdminPanelScreen()),
+        );
+      } else {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const Nav()),
         );
-      } else {
-        // Update the error message based on login result
-        setState(() {
-          _errorMessage = result['message'];
-        });
       }
+    } else {
+      setState(() {
+        _errorMessage = result['message'];
+      });
     }
   }
+}
 
 
   @override

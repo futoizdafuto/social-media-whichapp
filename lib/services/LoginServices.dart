@@ -10,6 +10,28 @@ class LoginService {
 
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+Future<List<dynamic>> getAllUsers() async {
+  final url = Uri.parse('$_baseUrl'); // API URL để lấy danh sách user
+  final token = await _storage.read(key: 'token'); // Lấy token từ storage
+
+  try {
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load users');
+    }
+  } catch (e) {
+    throw Exception('Error: $e');
+  }
+}
 
 Future<Map<String, dynamic>> login(String username, String password) async {
   final url = Uri.parse('$_baseUrl/login');
@@ -31,6 +53,7 @@ Future<Map<String, dynamic>> login(String username, String password) async {
         String userName = responseData['login']['data']['user']['name'];
         String realuserName = responseData['login']['data']['user']['username'];
         String avatarUrl = responseData['login']['data']['user']['avatar_url'] ?? '';
+           int roleUser = responseData['login']['data']['user']['role'];
 
         // Ghi lại tất cả thông tin vào storage và ghi đè nếu có dữ liệu cũ
         await _storage.write(key: 'token', value: token);
@@ -38,8 +61,8 @@ Future<Map<String, dynamic>> login(String username, String password) async {
         await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
         await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
         await _storage.write(key: 'realuserName', value: realuserName);// username
-
-        return {'status': 'success', 'token': token, 'userId': userId, 'realuserName': realuserName, 'userName': userName, 'avatarUrl': avatarUrl};
+        // await _storage.write(key: 'role', value: roleUser);
+        return {'status': 'success', 'token': token, 'userId': userId, 'realuserName': realuserName, 'userName': userName, 'avatarUrl': avatarUrl, 'role': roleUser};
       }
     }
     return {'status': 'error', 'message': 'Tài khoản hoặc mật khẩu không chính xác!'};
@@ -66,13 +89,13 @@ Future<Map<String, dynamic>> reLogin(String token) async {
         String userName = responseData['relogin']['data']['user']['name'];
         String realuserName = responseData['relogin']['data']['user']['username'];
         String avatarUrl = responseData['relogin']['data']['user']['avatar_url'] ?? '';
-
+        int role = responseData['relogin']['data']['user']['role']; // Lấy role
         // Ghi đè dữ liệu mới vào storage
         await _storage.write(key: 'userId', value: userId);
         await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
         await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
         await _storage.write(key: 'realuserName', value: realuserName); // username
-        return {'status': 'success', 'newToken': newToken};
+        return {'status': 'success', 'newToken': newToken, 'role':role};
       }
     }
     return {'status': 'error', 'message': 'Hết phiên đăng nhập'};
