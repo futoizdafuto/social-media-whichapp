@@ -1,13 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:socially_app_flutter_ui/data/models/notification/notification.dart';
 
 class LoginService {
-  static const _baseUrl = 'https://192.168.1.8:8443/api/users';
+  // static const _baseUrl = 'https://192.168.1.8:8443/api/users';
   // static const _baseUrl = 'https://10.150.105.205:8443/api/users';
-
+  static const _baseUrl = 'https://192.168.100.228:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 Future<List<dynamic>> getAllUsers() async {
@@ -53,7 +54,9 @@ Future<Map<String, dynamic>> login(String username, String password) async {
         String userName = responseData['login']['data']['user']['name'];
         String realuserName = responseData['login']['data']['user']['username'];
         String avatarUrl = responseData['login']['data']['user']['avatar_url'] ?? '';
-           int roleUser = responseData['login']['data']['user']['role'];
+        int roleUser = responseData['login']['data']['user']['role'];
+        String gender = responseData['login']['data']['user']['gender'] ?? ''; // Lấy gender
+        String birthday = responseData['login']['data']['user']['birthday'] ?? ''; // Lấy birthday
 
         // Ghi lại tất cả thông tin vào storage và ghi đè nếu có dữ liệu cũ
         await _storage.write(key: 'token', value: token);
@@ -61,8 +64,11 @@ Future<Map<String, dynamic>> login(String username, String password) async {
         await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
         await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
         await _storage.write(key: 'realuserName', value: realuserName);// username
+        await _storage.write(key: 'gender', value: gender); // Lưu gender
+        await _storage.write(key: 'birthday', value: birthday); // Lưu birthday
         // await _storage.write(key: 'role', value: roleUser);
-        return {'status': 'success', 'token': token, 'userId': userId, 'realuserName': realuserName, 'userName': userName, 'avatarUrl': avatarUrl, 'role': roleUser};
+        return {'status': 'success', 'token': token, 'userId': userId, 'realuserName': realuserName, 'userName': userName, 'avatarUrl': avatarUrl, 'role': roleUser,   'gender': gender,  // Trả về gender
+          'birthday': birthday,};
       }
     }
     return {'status': 'error', 'message': 'Tài khoản hoặc mật khẩu không chính xác!'};
@@ -90,11 +96,16 @@ Future<Map<String, dynamic>> reLogin(String token) async {
         String realuserName = responseData['relogin']['data']['user']['username'];
         String avatarUrl = responseData['relogin']['data']['user']['avatar_url'] ?? '';
         int role = responseData['relogin']['data']['user']['role']; // Lấy role
+        String gender = responseData['login']['data']['user']['gender'] ?? ''; // Lấy gender
+        String birthday = responseData['login']['data']['user']['birthday'] ?? ''; // Lấy birthday
+
         // Ghi đè dữ liệu mới vào storage
         await _storage.write(key: 'userId', value: userId);
         await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
         await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
         await _storage.write(key: 'realuserName', value: realuserName); // username
+        await _storage.write(key: 'gender', value: gender); // Lưu gender
+        await _storage.write(key: 'birthday', value: birthday); // Lưu birthday
         return {'status': 'success', 'newToken': newToken, 'role':role};
       }
     }
@@ -146,7 +157,9 @@ Future<Map<String, dynamic>> reLogin(String token) async {
       await _storage.delete(key: 'userId');
       await _storage.delete(key: 'userName');
       await _storage.delete(key: 'avatarUrl');
-      await _storage.delete(key: 'realuserName'); // Nếu cần
+      await _storage.delete(key: 'realuserName'); 
+      await _storage.delete(key: 'gender');
+      await _storage.delete(key: 'birthday'); 
 
       return {'status': 'success', 'message': 'Logged out successfully'};
     } else {
@@ -202,12 +215,16 @@ Future<Map<String, dynamic>> loginWithGoogle() async {
           String userName = responseBody['data']['user']['name'];
           String realuserName = responseBody['data']['user']['username'];
           String avatarUrl = responseBody['data']['user']['avatar_url'] ?? '';
+          String gender = responseBody['login']['data']['user']['gender'] ?? ''; // Lấy gender
+          String birthday = responseBody['login']['data']['user']['birthday'] ?? ''; // Lấy birthday
 
   
           await _storage.write(key: 'userId', value: userId);
           await _storage.write(key: 'userName', value: userName); // Lưu tên người dùng
           await _storage.write(key: 'avatarUrl', value: avatarUrl); // Lưu avatar người dùng
           await _storage.write(key: 'realuserName', value: realuserName);// username
+          await _storage.write(key: 'gender', value: gender); // Lưu gender
+          await _storage.write(key: 'birthday', value: birthday); // Lưu birthday
         return {
           'status': 'success',
           'message': 'Đăng nhập thành công',
@@ -248,4 +265,63 @@ Future<List<NotificationA>> getAllNotifications() async {
       throw Exception('Failed to load notifications');
     }
 }
+
+Future<Map<String, dynamic>> updateInformation({
+  required int userId,
+  String? gender,
+  String? birthDate,
+  File? avatarFile,
+}) async {
+  final url = Uri.parse('$_baseUrl/update_information');
+  final token = await _storage.read(key: 'token');
+
+  if (token == null) {
+    return {'status': 'error', 'message': 'Authentication token not found'};
+  }
+
+  try {
+    // Build the multipart request
+    final request = http.MultipartRequest('POST', url)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..fields['userId'] = userId.toString();
+
+    if (gender != null) {
+      request.fields['gender'] = gender;
+    }
+
+    if (birthDate != null) {
+      request.fields['birthDate'] = birthDate;
+    }
+
+    if (avatarFile != null) {
+      request.files.add(await http.MultipartFile.fromPath('avatarFile', avatarFile.path));
+    }
+
+    // Send the request
+    final response = await http.Response.fromStream(await request.send());
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['updateInformationUser']['status'] == 'success') {
+        return {
+          'status': 'success',
+          'user': responseData['updateInformationUser']['user'],
+        };
+      } else {
+        return {
+          'status': 'error',
+          'message': responseData['message'] ?? 'Failed to update information',
+        };
+      }
+    } else {
+      return {
+        'status': 'error',
+        'message': 'Failed to update information. Status code: ${response.statusCode}',
+      };
+    }
+  } catch (e) {
+    return {'status': 'error', 'message': 'Connection error: $e'};
+  }
+}
+
 }

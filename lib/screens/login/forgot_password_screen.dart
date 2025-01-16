@@ -10,12 +10,7 @@ import 'package:socially_app_flutter_ui/services/ForgotPasswordServices.dart';
 import 'package:socially_app_flutter_ui/services/VerifyOTPMailServices.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  final String email;
-
-  const ForgotPasswordScreen({
-    Key? key,
-    required this.email,
-  }) : super(key: key);
+  const ForgotPasswordScreen({Key? key}) : super(key: key);
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -121,9 +116,9 @@ Future<void> handleVerifyEmail() async {
                         Expanded(
                           child: TextFormField(
                             controller: _emailController,
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.text,
                             decoration: InputDecoration(
-                              labelText: 'Email',
+                              labelText: 'Email hoặc username',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
