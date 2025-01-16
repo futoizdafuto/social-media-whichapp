@@ -66,13 +66,29 @@ class _LoginScreenState extends State<LoginScreen> {
 void _handleGoogleLogin() async {
   try {
     final result = await _loginService.loginWithGoogle();
-       final name = await _loginService.getNameUser();
+    final name = await _loginService.getNameUser();
     if (result['status'] == 'success') {
-          print('Ten cua user: $name');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const Nav()),
-      );
+      print('Tên của user: $name');
+
+      // Kiểm tra các trường thông tin người dùng
+      String? gender = await _storage.read(key: 'gender');
+      String? birthday = await _storage.read(key: 'birthday');
+      String? avatarUrl = await _storage.read(key: 'avatarUrl');
+
+      // Kiểm tra xem có thiếu thông tin gì không
+      if (gender == null || gender.isEmpty || birthday == null || birthday.isEmpty || avatarUrl == null || avatarUrl.isEmpty) {
+        // Nếu thiếu thông tin, chuyển đến trang GenderSelectionScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => GenderSelectionScreen()),
+        );
+      } else {
+        // Nếu tất cả thông tin đều đầy đủ, chuyển đến trang Nav
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Nav()),
+        );
+      }
     } else {
       setState(() {
         _errorMessage = result['message'] ?? 'Lỗi đăng nhập Google';
@@ -84,6 +100,7 @@ void _handleGoogleLogin() async {
     });
   }
 }
+
 
   void _handleLogin() async {
   if (_formKey.currentState!.validate()) {
@@ -97,10 +114,7 @@ void _handleGoogleLogin() async {
       String? gender = await _storage.read(key: 'gender');
       String? birthday = await _storage.read(key: 'birthday');
       String? avatarUrl = await _storage.read(key: 'avatarUrl');
-     // Kiểm tra và in ra kết quả
-  print("Gender: ${gender ?? 'Không có dữ liệu'}");
-  print('Birthday: ${birthday ?? 'Không có dữ liệu'}');
-  print('AvatarUrl: ${avatarUrl ?? 'Không có dữ liệu'}');
+
       if (role == 1) {
         Navigator.pushReplacement(
           context,
@@ -354,29 +368,7 @@ void _handleGoogleLogin() async {
                     ),
 
 
-     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Test?"),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>  GenderSelectionScreen(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Lấy lại mật khẩu',
-                            style: TextStyle(
-                              color: Colors.blue, // Màu của chữ Đăng ký
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+
 
 
 

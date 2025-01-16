@@ -398,5 +398,68 @@ Future<Map<String, dynamic>> unbanUser(int userId) async {
     return {'status': 'error', 'message': 'Connection error: $e'};
   }
 }
+Future<Map<String, dynamic>> updateProfile({
+  required int userId,
+  String? name,  // Thêm name
+  String? gender,
+  String? birthDate,
+  File? avatarFile,
+}) async {
+  final url = Uri.parse('$_baseUrl/update_profile');  // API endpoint của bạn
+  final token = await _storage.read(key: 'token');
+
+  if (token == null) {
+    return {'status': 'error', 'message': 'Authentication token not found'};
+  }
+
+  try {
+    // Xây dựng multipart request
+    final request = http.MultipartRequest('POST', url)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..fields['userId'] = userId.toString();
+
+    // Thêm các trường vào request nếu có
+    if (name != null) {
+      request.fields['name'] = name;
+    }
+
+    if (gender != null) {
+      request.fields['gender'] = gender;
+    }
+
+    if (birthDate != null) {
+      request.fields['birthDate'] = birthDate;
+    }
+
+    if (avatarFile != null) {
+      request.files.add(await http.MultipartFile.fromPath('avatarFile', avatarFile.path));
+    }
+
+    // Gửi request
+    final response = await http.Response.fromStream(await request.send());
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['updateInformationUser']['status'] == 'success') {
+        return {
+          'status': 'success',
+          'user': responseData['updateInformationUser']['user'],
+        };
+      } else {
+        return {
+          'status': 'error',
+          'message': responseData['message'] ?? 'Failed to update profile',
+        };
+      }
+    } else {
+      return {
+        'status': 'error',
+        'message': 'Failed to update profile. Status code: ${response.statusCode}',
+      };
+    }
+  } catch (e) {
+    return {'status': 'error', 'message': 'Connection error: $e'};
+  }
+}
 
 }

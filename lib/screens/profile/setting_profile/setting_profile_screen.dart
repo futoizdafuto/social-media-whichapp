@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'dart:math' as math;
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
@@ -125,14 +129,7 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
             ),
           ),
           const SizedBox(height: 16.0),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Chỉnh sửa thông tin'),
-            onTap: () {
-              Navigator.pop(context);
-              print('Chỉnh sửa thông tin');
-            },
-          ),
+    
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Quyền riêng tư'),
@@ -219,4 +216,3 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
 
 
 }
-
