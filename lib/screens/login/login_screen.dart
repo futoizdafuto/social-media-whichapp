@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/screens/home/AdminPanelScreen.dart';
 import 'package:socially_app_flutter_ui/screens/login/forgot_password_screen.dart';
+import 'package:socially_app_flutter_ui/screens/register/InformationScreen.dart';
 import 'package:socially_app_flutter_ui/screens/register/Verify_OTP_mail_register.dart';
 import '../../config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
@@ -92,17 +93,34 @@ void _handleGoogleLogin() async {
     final result = await _loginService.login(username, password);
     if (result['status'] == 'success') {
       int role = result['role'];
-
+      // Lấy giá trị gender, birthday và avatarUrl từ storage
+      String? gender = await _storage.read(key: 'gender');
+      String? birthday = await _storage.read(key: 'birthday');
+      String? avatarUrl = await _storage.read(key: 'avatarUrl');
+     // Kiểm tra và in ra kết quả
+  print("Gender: ${gender ?? 'Không có dữ liệu'}");
+  print('Birthday: ${birthday ?? 'Không có dữ liệu'}');
+  print('AvatarUrl: ${avatarUrl ?? 'Không có dữ liệu'}');
       if (role == 1) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AdminPanelScreen()),
         );
       } else {
+        // Kiểm tra nếu một trong các giá trị này là null hoặc rỗng
+      if (gender == null || gender.isEmpty || birthday == null || birthday.isEmpty || avatarUrl == null || avatarUrl.isEmpty) {
+        // Nếu bất kỳ giá trị nào là null hoặc rỗng, chuyển đến trang GenderSelectionScreen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => GenderSelectionScreen()),
+        );
+      } else {
+        // Nếu tất cả các giá trị đều có, chuyển đến trang Nav
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const Nav()),
         );
+      }
       }
     } else {
       setState(() {
@@ -254,7 +272,7 @@ void _handleGoogleLogin() async {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ForgotPasswordScreen(email: "levuanhtuyet@gmail.com"),
+                                builder: (context) => const ForgotPasswordScreen(),
                               ),
                             );
                           },
@@ -334,6 +352,35 @@ void _handleGoogleLogin() async {
                         ),
                       ],
                     ),
+
+
+     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Test?"),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>  GenderSelectionScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Lấy lại mật khẩu',
+                            style: TextStyle(
+                              color: Colors.blue, // Màu của chữ Đăng ký
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+
+
+
                   ],
                 ),
               ),

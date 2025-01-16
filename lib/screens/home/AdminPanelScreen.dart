@@ -1,5 +1,6 @@
 // Import necessary packages
 import 'package:flutter/material.dart';
+import 'package:socially_app_flutter_ui/config/colors.dart';
 import 'package:socially_app_flutter_ui/screens/login/login_screen.dart';
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
 import 'package:socially_app_flutter_ui/data/repository/post_repository.dart';
@@ -321,6 +322,125 @@ class _PostManagementPageState extends State<PostManagementPage> {
 }
 
 
+class UserDetailScreen extends StatelessWidget {
+  final String userName;
+  final String email;
+  final String userId;
+
+  UserDetailScreen({
+    required this.userName,
+    required this.email,
+    required this.userId,
+  });
+
+  void _banUser(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Xác nhận"),
+        content: Text("Bạn có chắc chắn muốn cấm người dùng $userName không?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("Hủy"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Đóng dialog
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Người dùng $userName đã bị cấm.")),
+              );
+            },
+            child: Text("Đồng ý"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Chi tiết người dùng"),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        backgroundColor: Color(0xFF00BFA5),
+      ),
+      body: Column(
+        children: [
+          // Thông tin người dùng sát phía trên
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.grey.shade300,
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    userName,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    email,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "ID: $userId",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Nút cấm người dùng ở cuối màn hình
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () => _banUser(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: Text(
+                "Cấm người dùng",
+                style: TextStyle(fontSize: 16, color: kWhite),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Cập nhật trong UserCard để điều hướng đến UserDetailScreen
 class UserCard extends StatelessWidget {
   final int index;
   final String userName;
@@ -348,19 +468,19 @@ class UserCard extends StatelessWidget {
         ),
         title: Text(userName),
         subtitle: Text(email),
-        trailing: PopupMenuButton(
-          itemBuilder: (context) => [
-            PopupMenuItem(value: "edit", child: Text("Edit")),
-            PopupMenuItem(value: "delete", child: Text("Delete")),
-          ],
-          onSelected: (value) {
-            if (value == "edit") {
-              // Handle edit user logic
-            } else if (value == "delete") {
-              // Handle delete user logic
-            }
-          },
-        ),
+        onTap: () {
+          // Điều hướng đến UserDetailScreen khi bấm vào người dùng
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UserDetailScreen(
+                userName: userName,
+                email: email,
+                userId: "User-$index", // Giả lập User ID
+              ),
+            ),
+          );
+        },
       ),
     );
   }

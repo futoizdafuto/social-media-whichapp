@@ -1,13 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.socially_app_flutter_ui">
 
-     <!-- Thêm quyền truy cập Internet -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Thêm quyền truy cập Internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
-   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- Quyền cho Android 9 và các phiên bản trước Android 13 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Quyền cho Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
    <application
         android:label="socially_app_flutter_ui"
         android:name="${applicationName}"
