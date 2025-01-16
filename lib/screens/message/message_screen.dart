@@ -5,6 +5,8 @@ import 'package:socially_app_flutter_ui/screens/message/widgets/message_backgrou
 import 'package:socially_app_flutter_ui/screens/message/widgets/message_item.dart';
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
 
+import 'SettingChatScreen.dart'; // Import màn hình SettingChatScreen
+
 class MessageScreen extends StatelessWidget {
   const MessageScreen({Key? key}) : super(key: key);
 
@@ -25,8 +27,16 @@ class MessageScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: IconButton(
-                onPressed: () {},
                 icon: SvgPicture.asset('assets/icons/menu.svg'),
+                onPressed: () {
+                  // Hiển thị modal với màn hình SettingChatScreen
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const SettingChatScreen(),
+                  );
+                },
               ),
             ),
           ],
@@ -90,7 +100,7 @@ class MessageScreen extends StatelessWidget {
                     MessageItem(
                       name: 'Malena Tudi',
                       message:
-                          'Hey, how\'s going? Long text example, it should be go to next line! What about more?',
+                      'Hey, how\'s going? Long text example, it should be go to next line! What about more?',
                     ),
                     MessageItem(
                       name: 'Malena Tudi',
