@@ -1,3 +1,4 @@
+// Import necessary packages
 import 'package:flutter/material.dart';
 import '../../services/GroupServices.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -14,11 +15,13 @@ class _GroupListScreenState extends State<GroupListScreen> {
   List<Map<String, dynamic>> memberGroups = [];
   bool isLoading = true;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  late GroupService groupService;
 
   @override
   void initState() {
     super.initState();
     _loadGroups();
+    groupService = GroupService();
   }
 
   // Gọi phương thức getGroupsByRole và phân loại theo role
@@ -27,7 +30,7 @@ class _GroupListScreenState extends State<GroupListScreen> {
     final userId = int.parse(userIdString!);
 
     try {
-      final groupService = GroupService();  // Giả sử bạn đã có GroupService
+      //final groupService = GroupService();  // Giả sử bạn đã có GroupService
       final adminResponse = await groupService.getGroupsByRole(userId, 'admin');
       final memberResponse = await groupService.getGroupsByRole(userId, 'member');
 
@@ -93,6 +96,28 @@ class _GroupListScreenState extends State<GroupListScreen> {
               ),
               title: Text(group['name']),
               subtitle: Text(group['description']),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () async {
+                  // Xác nhận trước khi xóa
+                  bool confirm = await _showDeleteDialog(context);
+                  if (confirm) {
+                    final userIdString = await _storage.read(key: 'userId');
+                    //final userId = int.parse(userIdString!);
+
+
+                    final response = await groupService.deleteGroup(group['id']);
+                    if (response['status'] == 'success') {
+                      // Thông báo thành công và reload danh sách nhóm
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response['message'])));
+                      _loadGroups(); // Tải lại nhóm sau khi xóa
+                    } else {
+                      // Thông báo lỗi
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${response['message']}')));
+                    }
+                  }
+                },
+              ),
               onTap: () {
                 print('Tapped on group: ${group['name']}');
               },
@@ -102,4 +127,25 @@ class _GroupListScreenState extends State<GroupListScreen> {
       ],
     );
   }
+}
+Future<bool> _showDeleteDialog(BuildContext context) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('xóa Group'),
+        content: const Text('Bạn có chắc muốn xóa Group?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Trả về `false` nếu hủy
+            child: const Text('hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true), // Trả về `true` nếu xác nhận
+            child: const Text('xóa'),
+          ),
+        ],
+      );
+    },
+  ).then((value) => value ?? false); // Nếu `null`, mặc định trả về `false`.
 }

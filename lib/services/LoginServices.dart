@@ -8,7 +8,7 @@ import 'package:socially_app_flutter_ui/data/models/notification/notification.da
 class LoginService {
   // static const _baseUrl = 'https://192.168.1.8:8443/api/users';
   // static const _baseUrl = 'https://10.150.105.205:8443/api/users';
-  static const _baseUrl = 'https://192.168.100.228:8443/api/users';
+  static const _baseUrl = 'https://192.168.1.6:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 Future<List<dynamic>> getAllUsers() async {

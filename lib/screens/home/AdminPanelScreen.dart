@@ -260,27 +260,11 @@ class _PostManagementPageState extends State<PostManagementPage> {
                       Text('Created At: ${post.createdAt.toLocal()}'),
                     ],
                   ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        // Xử lý việc chỉnh sửa bài đăng
-                        _showEditDialog(context, post);
-                      } else if (value == 'delete') {
-                        // Xử lý việc xóa bài đăng
-                        _showDeleteDialog(context, post);
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Text('Edit'),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Text('Delete'),
-                        ),
-                      ];
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      // Hiển thị hộp thoại xác nhận xóa bài đăng
+                      _showDeleteDialog(context, post);
                     },
                   ),
                 ),
@@ -290,10 +274,6 @@ class _PostManagementPageState extends State<PostManagementPage> {
         }
       },
     );
-  }
-
-  void _showEditDialog(BuildContext context, Post post) {
-    // Xử lý hiển thị hộp thoại chỉnh sửa bài đăng
   }
 
   void _showDeleteDialog(BuildContext context, Post post) {
@@ -324,6 +304,7 @@ class _PostManagementPageState extends State<PostManagementPage> {
     );
   }
 }
+
 
 
 class UserDetailScreen extends StatelessWidget {

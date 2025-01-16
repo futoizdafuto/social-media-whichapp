@@ -6,8 +6,9 @@ import 'package:socially_app_flutter_ui/screens/message/widgets/message_backgrou
 import 'package:socially_app_flutter_ui/screens/nav/nav.dart';
 import 'package:socially_app_flutter_ui/screens/message/widgets/message_item.dart';
 import 'package:socially_app_flutter_ui/services/GroupServices.dart';
-
-import 'SettingChatScreen.dart'; // Import màn hình SettingChatScreen
+import 'package:socially_app_flutter_ui/data/models/user/user.dart';
+import 'package:socially_app_flutter_ui/screens/message/SettingChatScreen.dart';
+import 'package:socially_app_flutter_ui/screens/message_detail/message_detail_screen.dart';
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({Key? key}) : super(key: key);
@@ -19,6 +20,7 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   late Future<List<Group>?> _groupsFuture;
   final GroupService _groupService = GroupService();
+
   @override
   void initState() {
     super.initState();
@@ -86,49 +88,81 @@ class _MessageScreenState extends State<MessageScreen> {
                           .copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 30.0),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15.0),
-                        boxShadow: [
-                          BoxShadow(
-                            offset: const Offset(0, 4),
-                            blurRadius: 25.0,
-                            color: kBlack.withOpacity(0.10),
-                          )
-                        ],
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: kWhite,
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: const BorderSide(
-                              width: 0.0,
-                              style: BorderStyle.none,
-                            ),
-                          ),
-                          prefixIcon: Image.asset('assets/images/search.png'),
-                          hintText: 'Search for contacts',
-                          hintStyle: Theme.of(context)
-                              .textTheme
-                              .labelSmall!
-                              .copyWith(color: k1LightGray),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30.0),
                     ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: groups.length,
                       itemBuilder: (context, index) {
                         final group = groups[index];
-                        return MessageItem(
-                          name: group.name,
-                          message: group.description ?? 'No description',
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          leading: CircleAvatar(
+                            backgroundImage: group.avatar != null
+                                ? NetworkImage(group.avatar!) // Nếu nhóm có ảnh, sử dụng ảnh từ URL
+                                : null,
+                            child: group.avatar == null
+                                ? Text(group.name[0]) // Nếu không có ảnh, hiển thị chữ cái đầu tiên
+                                : null,
+                          ),
+                          title: Text(group.name),
+                          subtitle: Text(group.description ?? 'No description'),
+                          trailing: PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'delete') {
+                                bool confirm = await _showDeleteDialog(context);
+                                if (confirm) {
+                                  // Gọi API xóa nhóm
+                                  final response = await _groupService.deleteGroup(group.roomId);
+                                  if (response['status'] == 'success') {
+                                    setState(() {
+                                      groups.removeAt(index); // Cập nhật danh sách nhóm sau khi xóa
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(response['message'])),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: ${response['message']}')),
+                                    );
+                                  }
+                                }
+                              } else if (value == 'members') {
+                                // Gọi API để lấy thành viên và hiển thị trong bottom sheet
+                                final members = await _groupService.getMembers(group.roomId);
+                                _showMembersBottomSheet(context, members);
+                              }
+                            },
+                            itemBuilder: (BuildContext context) => [
+                              PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Row(
+                                  children: const [
+                                    Icon(Icons.delete, color: Colors.red),
+                                    SizedBox(width: 10),
+                                    Text('Xóa nhóm'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem<String>(
+                                value: 'members',
+                                child: Row(
+                                  children: const [
+                                    Icon(Icons.group, color: Colors.blue),
+                                    SizedBox(width: 10),
+                                    Text('Xem thành viên'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MessageDetailScreen(), // Truyền dữ liệu nhóm vào
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -141,77 +175,73 @@ class _MessageScreenState extends State<MessageScreen> {
       ),
     );
   }
-}
 
-
-class GroupAvatar extends StatelessWidget {
-  final String mainImage;
-  final List<String> subImages;
-
-  const GroupAvatar({
-    Key? key,
-    required this.mainImage,
-    required this.subImages,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 80,
-      height: 80,
-      child: Stack(
-        children: [
-          // Hình lớn
-          ClipOval(
-            child: Image.asset(
-              mainImage,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+  // Hàm để hiển thị danh sách thành viên trong Bottom Sheet
+  void _showMembersBottomSheet(BuildContext context, List<User> members) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Members',
+                // style: Theme.of(context).textTheme.headline6!.copyWith(
+                //   fontWeight: FontWeight.bold,
+                // ),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: members.length,
+                itemBuilder: (context, index) {
+                  final member = members[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                    radius: 25, // Đặt kích thước của avatar (25px)
+                    backgroundImage: member.avatar_url != null
+                        ? NetworkImage(member.avatar_url!) // Hiển thị ảnh avatar nếu có
+                        : null,
+                    child: member.avatar_url == null
+                        ? Text(
+                            member.name[0], // Hiển thị chữ cái đầu tiên nếu không có avatar
+                            style: const TextStyle(fontSize: 20),
+                          )
+                        : null,
+                  ),
+                    title: Text(member.name),
+                    subtitle: Text(member.email),
+                  );
+                },
+              ),
+            ],
           ),
-          // Hình nhỏ bên trong
-          if (subImages.isNotEmpty)
-            Positioned(
-              top: 5,
-              left: 5,
-              child: ClipOval(
-                child: Image.asset(
-                  subImages[0],
-                  width: 25,
-                  height: 25,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          if (subImages.length > 1)
-            Positioned(
-              top: 5,
-              right: 5,
-              child: ClipOval(
-                child: Image.asset(
-                  subImages[1],
-                  width: 25,
-                  height: 25,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          if (subImages.length > 2)
-            Positioned(
-              bottom: 5,
-              left: 5,
-              child: ClipOval(
-                child: Image.asset(
-                  subImages[2],
-                  width: 25,
-                  height: 25,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
+}
+
+Future<bool> _showDeleteDialog(BuildContext context) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('xóa Group'),
+        content: const Text('Bạn có chắc muốn xóa Group?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Trả về `false` nếu hủy
+            child: const Text('hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true), // Trả về `true` nếu xác nhận
+            child: const Text('xóa'),
+          ),
+        ],
+      );
+    },
+  ).then((value) => value ?? false); // Nếu `null`, mặc định trả về `false`.
 }

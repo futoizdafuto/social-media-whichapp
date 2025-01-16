@@ -1,15 +1,16 @@
 import 'dart:convert';
-import 'dart:ffi';
+//import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:socially_app_flutter_ui/data/models/group.dart';
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
+import 'package:socially_app_flutter_ui/data/models/user/user.dart';
 
 class GroupService {
   // static const _baseUrl = 'https://192.168.1.8:8443/api/users';
   // static const _baseUrl = 'https://10.0.172.216:8443/api/groups';
-      static const _baseUrl = 'https://192.168.100.228:8443/api/groups';
+      static const _baseUrl = 'https://192.168.1.6:8443/api/groups';
   // static const _baseUrl = 'https://192.168.1.40:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -218,6 +219,73 @@ Future<List<Group>?> getUserGroups() async {
   } catch (e) {
     print('Error in getUserGroups: $e'); // Log lỗi xảy ra
     throw Exception('An error occurred: $e');
+  }
+}
+
+Future<Map<String, dynamic>> deleteGroup(int groupId) async {
+  String? token = await _getValidToken();
+  String? userId = await _storage.read(key: 'userId');
+  if (token == null) {
+    return {
+      'status': 'error',
+      'message': 'Failed to get valid token. Please log in again.',
+    };
+  }
+
+      if (userId == null) {
+      throw Exception('Failed to get userId. Please log in again.');
+    }
+
+  final url = Uri.parse('$_baseUrl/$groupId/delete');
+  try {
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+    // Tạo body JSON chứa userId
+    final body = jsonEncode({
+      'userId': userId,
+    });
+    // Gửi yêu cầu DELETE với body
+    final response = await http.delete(url, headers: headers, body: body);
+    print("Response status: ${response.statusCode}");
+    print("Response body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return {
+        'status': 'success',
+        'message': 'Group deleted successfully.',
+      };
+    } else {
+      return {
+        'status': 'error',
+        'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+      };
+    }
+  } catch (e) {
+    return {
+      'status': 'error',
+      'message': 'An error occurred: $e',
+    };
+  }
+}  
+  // Phương thức để lấy danh sách thành viên của nhóm
+  Future<List<User>> getMembers(int groupId) async {
+  String? token = await _getValidToken();
+  
+  final response = await http.get(
+    Uri.parse('$_baseUrl/$groupId/users'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+  
+  if (response.statusCode == 200) {
+    List<dynamic> jsonResponse = jsonDecode(response.body);
+    return jsonResponse.map((user) => User.fromJson(user)).toList();
+  } else {
+    throw Exception('Failed to load group members');
   }
 }
 
