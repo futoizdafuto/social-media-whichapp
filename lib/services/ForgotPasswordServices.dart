@@ -3,7 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class Forgotpasswordservices {
-   static const _baseUrl = 'https://192.168.1.8:8443/api/users';
+  //  static const _baseUrl = 'https://192.168.1.8:8443/api/users';
+         static const _baseUrl = 'https://192.168.100.228:8443/api/users';
   //  static const _baseUrl = 'https://10.150.105.205:8443/api/users';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 

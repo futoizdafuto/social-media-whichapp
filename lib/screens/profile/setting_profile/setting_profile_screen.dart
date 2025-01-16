@@ -146,6 +146,12 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
           //     print('Cài đặt tài khoản');
           //   },
           // ),
+          
+          ListTile(
+            leading: const Icon(Icons.block),
+            title: const Text('Danh sách chặn'),
+            onTap: _navigateToBlockedList,
+          ),
           ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Đăng xuất'),
@@ -169,11 +175,6 @@ class _SettingProfileScreenState extends State<SettingProfileScreen> {
                   );
                 }
               }
-          ),
-          ListTile(
-            leading: const Icon(Icons.block),
-            title: const Text('Danh sách chặn'),
-            onTap: _navigateToBlockedList,
           ),
         ],
       ),
