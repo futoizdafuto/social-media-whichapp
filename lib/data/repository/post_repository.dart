@@ -76,10 +76,10 @@ class PostRepository {
           var user = User(
             user_id: userJson['user_id'],
             user_name: userJson['username'],
-            avatar_url: '',
+            avatar_url: userJson['avatar_url'],
             password: '',
             email: '',
-            name: '',
+            name: userJson['name'],
             post: [],
           );
 

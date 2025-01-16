@@ -48,36 +48,38 @@ class _HomeScreenState extends State<HomeScreen> {
                   .copyWith(fontWeight: FontWeight.w700),
             ),
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: IconButton(
-                onPressed: () {
-                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SearchScreen(),  // Navigate to SearchScreen
-                    ),
-                  );
-                };
-                icon: SvgPicture.asset('assets/icons/search.svg'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: IconButton(
-                onPressed: () {
-                  // Thêm Navigator.push để chuyển trang
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NotificationScreen()),
-                  );
-                },
-                icon: SvgPicture.asset('assets/icons/notif.svg'),
-              ),
-            ),
-          ],
+       actions: [
+  Padding(
+    padding: const EdgeInsets.only(left: 10.0),
+    child: IconButton(
+      icon: SvgPicture.asset('assets/icons/search.svg'), // Sử dụng SvgPicture thay cho Icon
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SearchScreen(),  // Navigate to SearchScreen
+          ),
+        );
+      },
+    ),
+  ),
+  Padding(
+    padding: const EdgeInsets.only(right: 10.0),
+    child: IconButton(
+      onPressed: () {
+        // Thêm Navigator.push để chuyển trang
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const NotificationScreen(),
+          ),
+        );
+      },
+      icon: SvgPicture.asset('assets/icons/notif.svg'), // Sử dụng SvgPicture thay cho Icon
+    ),
+  ),
+],
+
         ),
         body: SingleChildScrollView(
           child: Column(
