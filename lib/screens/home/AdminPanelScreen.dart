@@ -332,7 +332,7 @@ class UserDetailScreen extends StatelessWidget {
       }
       return date; // Trả về nguyên dạng nếu không thể tách được
     }
-void _handleAction(
+ void _handleAction(
     BuildContext context, Future<Map<String, dynamic>> Function(int) action,
     {required String successMessage, required String errorMessage}) async {
   final result = await action(int.parse(userId)); // Chuyển đổi userId thành int
