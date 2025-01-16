@@ -3,12 +3,13 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:socially_app_flutter_ui/data/models/group.dart';
 import 'package:socially_app_flutter_ui/services/LoginServices.dart';
 
 class GroupService {
   // static const _baseUrl = 'https://192.168.1.8:8443/api/users';
-  static const _baseUrl = 'https://10.0.172.216:8443/api/groups';
-
+  // static const _baseUrl = 'https://10.0.172.216:8443/api/groups';
+      static const _baseUrl = 'https://192.168.100.228:8443/api/groups';
   // static const _baseUrl = 'https://192.168.1.40:8443/api/users';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -164,6 +165,61 @@ class GroupService {
     }
   }
 
+Future<List<Group>?> getUserGroups() async {
+  try {
+    // Lấy token từ FlutterSecureStorage
+    String? token = await _getValidToken();
+    print('Token: $token'); // Log token
+    if (token == null) {
+      throw Exception('Failed to get valid token. Please log in again.');
+    }
+
+    // Lấy userId từ FlutterSecureStorage
+    String? userId = await _storage.read(key: 'userId');
+    print('User ID: $userId'); // Log userId
+    if (userId == null) {
+      throw Exception('Failed to get userId. Please log in again.');
+    }
+
+    // URL cho endpoint lấy danh sách nhóm của user
+    final url = Uri.parse('$_baseUrl/users/groups?userId=$userId');
+    print('Request URL: $url'); // Log URL
+
+    // Header của yêu cầu
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+    print('Request headers: $headers'); // Log headers
+
+    // Gửi yêu cầu HTTP GET
+    final response = await http.post(url, headers: headers);
+    print('Response status: ${response.statusCode}'); // Log status code
+    print('Response body: ${response.body}'); // Log response body
+
+    if (response.statusCode == 200) {
+      // Xử lý khi API trả về thành công
+      final responseData = jsonDecode(response.body);
+      print('Response data: $responseData'); // Log parsed response
+
+      if (responseData['getUserGroups'] != null &&
+          responseData['getUserGroups']['status'] == 'success') {
+        final groupsJson = responseData['getUserGroups']['data']['groups'] as List;
+        print('Groups JSON: $groupsJson'); // Log danh sách nhóm
+        return groupsJson.map((groupJson) => Group.fromJson(groupJson)).toList();
+      } else {
+        final errorMessage =
+            responseData['getUserGroups']['message'] ?? 'Unknown error';
+        throw Exception(errorMessage);
+      }
+    } else {
+      throw Exception('HTTP error: ${response.statusCode} - ${response.body}');
+    }
+  } catch (e) {
+    print('Error in getUserGroups: $e'); // Log lỗi xảy ra
+    throw Exception('An error occurred: $e');
+  }
+}
 
 
 // Method to get follows and update the token

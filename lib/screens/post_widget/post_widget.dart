@@ -137,31 +137,37 @@ class _PostsState extends State<Posts> {
                   avatarUrl != null
                   ? CircleAvatar(
                         backgroundImage: NetworkImage(post.user.avatar_url),
-                        maxRadius: 16.0,
+                        maxRadius: 25.0,
                       )
                     : const CircleAvatar(
                         backgroundColor: Color.fromARGB(255, 255, 255, 255), // Màu nền khi không có avatar
                         child: Icon(Icons.person, color: Color.fromARGB(255, 121, 121, 121)),
-                        maxRadius: 16.0,
+                        maxRadius: 25.0,
                       ),
                   const SizedBox(width: 8.0),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        post.user.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall!
-                            .copyWith(color: k1Gray),
-                      ),
-                      Text(
-                        post.createdAt.toIso8601String(),
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge!
-                            .copyWith(color: k1Gray),
-                      ),
+                     Text(
+                      post.user.name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall!
+                          .copyWith(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            fontWeight: FontWeight.bold, // Làm cho chữ đậm
+                            fontSize: 18.0, // Thay đổi kích thước chữ (có thể điều chỉnh theo ý muốn)
+                          ),
+                    ),
+
+                  Text(
+                    "${post.createdAt.day}/${post.createdAt.month}/${post.createdAt.year} ${post.createdAt.hour}:${post.createdAt.minute}:${post.createdAt.second}",
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge!
+                        .copyWith(color: k1Gray),
+                  ),
+
                     ],
                   ),
                 ],

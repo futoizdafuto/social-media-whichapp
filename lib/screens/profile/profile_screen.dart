@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Future<String?> _userNameFuture;
   late List<dynamic> _posts = []; // Initialize the _posts variable
   List<Map<String, dynamic>> _imageList = [];  // Khởi tạo giá trị mặc định
-
+  late Future<String?> avatarUrl;
 
   // Thêm các biến để lưu trữ số lượng followers và following
   int _followingCount = 0;
@@ -104,10 +104,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final storage = FlutterSecureStorage();
     return await storage.read(key: 'realuserName');  // Assuming realUserName is saved under this key
   }
+  // Hàm để đọc avatar từ storage
+  Future<String?> _loadAvatar() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'avatar_url'); 
+  }
   Future<void> fetchImages() async {
     final postService = PostRepository(); // Repository to handle API calls
     final realUserName = await _getRealUserName(); // Fetch the real username from storage
-
+final avatar = await _loadAvatar();
     if (realUserName != null) {
       try {
         final imagesResponse = await postService
@@ -370,6 +375,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     fetchPostCount();
     fetchImages();
     fetchPosts();
+    avatarUrl = _loadAvatar();
+    print(avatarUrl);
   }
   void _showImageModal(BuildContext context, String imageUrl) {
     showModalBottomSheet(
@@ -499,14 +506,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       ClipPath(
-                        clipper: ProfileImageClipper(),
-                        child: Image.asset(
-                          'assets/images/profile_image.jpg',
-                          width: 180.0,
-                          height: 180.0,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+  clipper: ProfileImageClipper(),
+  child: FutureBuilder<String?>(
+    future: _loadAvatar(),  // Hàm đọc avatar từ storage
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const CircularProgressIndicator();  // Hiển thị khi đang tải
+      } else if (snapshot.hasError) {
+        return const Icon(Icons.error);  // Hiển thị lỗi nếu có
+      } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+        // Nếu có URL avatar
+        return Image.network(
+          snapshot.data!,  // Dùng URL từ storage
+          width: 180.0,
+          height: 180.0,
+          fit: BoxFit.cover,
+        );
+      } else {
+        // Nếu không có avatar, sử dụng icon person
+        return const Icon(
+          Icons.person,
+          size: 180.0,
+          color: Colors.grey,  // Màu sắc có thể thay đổi
+        );
+      }
+    },
+  ),
+)
+
                     ],
                   ),
                   Text(
