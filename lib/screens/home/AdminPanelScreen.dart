@@ -168,6 +168,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
                               index: index,
                               userName: user['name'],
                               email: user['email'],
+                              avatarUrl: user['avatar_url'],
+                              userId: user['userId'].toString(),  // Truyền userId
+                  gender: user['gender'],  // Truyền gender
+                  birthday: user['birthday'], 
                             );
                           },
                         ),
@@ -326,12 +330,48 @@ class UserDetailScreen extends StatelessWidget {
   final String userName;
   final String email;
   final String userId;
+  final String avatarUrl; 
+  final String gender;
+  final String birthday;
+
 
   UserDetailScreen({
     required this.userName,
     required this.email,
     required this.userId,
+    required this.avatarUrl,
+    required this.gender,
+    required this.birthday,
   });
+  String formatDate(String date) {
+      // Chuyển đổi ngày sinh từ định dạng YYYY-MM-DD sang DD-MM-YYYY
+      final parts = date.split('-');
+      if (parts.length == 3) {
+        return '${parts[2]}-${parts[1]}-${parts[0]}'; // Trả về DD-MM-YYYY
+      }
+      return date; // Trả về nguyên dạng nếu không thể tách được
+    }
+void _handleAction(
+    BuildContext context, Future<Map<String, dynamic>> Function(int) action,
+    {required String successMessage, required String errorMessage}) async {
+  final result = await action(int.parse(userId)); // Chuyển đổi userId thành int
+  Navigator.of(context).pop(); // Đóng dialog
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        result['status'] == 'success' ? successMessage : result['message'] ?? errorMessage,
+      ),
+      behavior: SnackBarBehavior.floating, // Cho phép SnackBar nổi lên không che khuất UI
+      margin: EdgeInsets.fromLTRB(20, 0, 20, 100), // Thêm khoảng cách dưới cùng để không che nút
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+  );
+}
+
+
+  final LoginService _loginService = LoginService();
 
   void _banUser(BuildContext context) {
     showDialog(
@@ -345,12 +385,37 @@ class UserDetailScreen extends StatelessWidget {
             child: Text("Hủy"),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Đóng dialog
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Người dùng $userName đã bị cấm.")),
-              );
-            },
+            onPressed: () => _handleAction(
+              context,
+              (userId) => _loginService.banUser(userId), 
+              successMessage: "Người dùng $userName đã bị cấm.",
+              errorMessage: "Không thể cấm người dùng.",
+            ),
+            child: Text("Đồng ý"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _unbanUser(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Xác nhận"),
+        content: Text("Bạn có chắc chắn muốn gỡ cấm người dùng $userName không?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("Hủy"),
+          ),
+          TextButton(
+            onPressed: () => _handleAction(
+              context,
+              (userId) => _loginService.unbanUser(userId),
+              successMessage: "Người dùng $userName đã được gỡ cấm.",
+              errorMessage: "Không thể gỡ cấm người dùng.",
+            ),
             child: Text("Đồng ý"),
           ),
         ],
@@ -372,23 +437,46 @@ class UserDetailScreen extends StatelessWidget {
         backgroundColor: Color(0xFF00BFA5),
       ),
       body: Column(
+       
         children: [
           // Thông tin người dùng sát phía trên
           Expanded(
             child: Center(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, 
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.grey.shade300,
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: Colors.grey.shade700,
-                    ),
+                    backgroundImage: NetworkImage(avatarUrl), // Tải ảnh avatar từ URL
+                    // child: ClipOval(
+                    //   child: Image.network(
+                    //     avatarUrl,
+                    //     width: 60,
+                    //     height: 60,
+                    //     fit: BoxFit.cover,
+                    //     errorBuilder: (context, error, stackTrace) {
+                    //       // Nếu không thể tải ảnh, hiển thị icon mặc định
+                    //       return Icon(
+                    //         Icons.person,
+                    //         size: 60,
+                    //         color: Colors.grey.shade700,
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                   ),
                   SizedBox(height: 20),
+                  
+                  Text(
+                    "ID người dùng: $userId",
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: const Color.fromARGB(255, 72, 72, 72),
+                    ),
+                  ),
+                  SizedBox(height: 8),
                   Text(
                     userName,
                     style: TextStyle(
@@ -398,18 +486,32 @@ class UserDetailScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    email,
+                    'Email: '+email,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 72, 72, 72),
+                    ),
+                  ),
+                
+                   SizedBox(height: 8),
+                 Text(
+                    "Giới tính: ${gender == 'Male' ? 'Nam' : 'Nữ'}",  // Hiển thị 'Nam' hoặc 'Nữ' dựa trên giới tính
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: gender == 'Male' 
+                          ? Colors.blue   // Nếu giới tính là 'Male', màu xanh dương
+                          : Colors.pink,  // Nếu giới tính là 'Female', màu hồng
                     ),
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "ID: $userId",
+                    "Ngày sinh: ${formatDate(birthday)}",
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 72, 72, 72),
                     ),
                   ),
                 ],
@@ -417,21 +519,40 @@ class UserDetailScreen extends StatelessWidget {
             ),
           ),
           // Nút cấm người dùng ở cuối màn hình
-          Padding(
+         Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () => _banUser(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _banUser(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    "Cấm người dùng",
+                    style: TextStyle(fontSize: 12, color: Colors.white),
+                  ),
                 ),
-              ),
-              child: Text(
-                "Cấm người dùng",
-                style: TextStyle(fontSize: 16, color: kWhite),
-              ),
+                ElevatedButton(
+                  onPressed: () => _unbanUser(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    "Gỡ cấm",
+                    style: TextStyle(fontSize: 14, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -445,11 +566,19 @@ class UserCard extends StatelessWidget {
   final int index;
   final String userName;
   final String email;
+  final String avatarUrl;
+  final String userId;  // Truyền thêm userId
+  final String gender;  // Truyền thêm gender
+  final String birthday;
 
   UserCard({
     required this.index,
     required this.userName,
     required this.email,
+    required this.avatarUrl,
+    required this.userId,
+    required this.gender,
+    required this.birthday,
   });
 
   @override
@@ -458,12 +587,24 @@ class UserCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ListTile(
+       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Color(0xFF00BFA5),
-          child: Text(
-            userName[0].toUpperCase(),
-            style: TextStyle(color: Colors.white),
+          child: ClipOval(
+            child: Image.network(
+              avatarUrl,
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                // Nếu không thể tải ảnh, hiển thị một hình ảnh mặc định
+                return Icon(
+                  Icons.person,
+                  size: 60,
+                  color: Colors.grey.shade700,
+                );
+              },
+            ),
           ),
         ),
         title: Text(userName),
@@ -476,7 +617,10 @@ class UserCard extends StatelessWidget {
               builder: (context) => UserDetailScreen(
                 userName: userName,
                 email: email,
-                userId: "User-$index", // Giả lập User ID
+                userId: userId, // Giả lập User ID
+                avatarUrl: avatarUrl,
+                gender: gender,  // Truyền gender
+                birthday: birthday, 
               ),
             ),
           );
