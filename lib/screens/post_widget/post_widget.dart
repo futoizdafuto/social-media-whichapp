@@ -142,7 +142,7 @@ class _PostsState extends State<Posts> {
                     : const CircleAvatar(
                         backgroundColor: Color.fromARGB(255, 255, 255, 255), // Màu nền khi không có avatar
                         child: Icon(Icons.person, color: Color.fromARGB(255, 121, 121, 121)),
-                        maxRadius: 25.0,
+                        maxRadius: 16.0,
                       ),
                   const SizedBox(width: 8.0),
                   Column(

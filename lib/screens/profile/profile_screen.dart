@@ -26,7 +26,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late Future<String?> _userNameFuture;
   late List<dynamic> _posts = []; // Initialize the _posts variable
   List<Map<String, dynamic>> _imageList = [];  // Khởi tạo giá trị mặc định
-  late Future<String?> avatarUrl;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  String? avatarUrl;
 
   // Thêm các biến để lưu trữ số lượng followers và following
   int _followingCount = 0;
@@ -104,15 +105,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final storage = FlutterSecureStorage();
     return await storage.read(key: 'realuserName');  // Assuming realUserName is saved under this key
   }
-  // Hàm để đọc avatar từ storage
-  Future<String?> _loadAvatar() async {
-    final storage = FlutterSecureStorage();
-    return await storage.read(key: 'avatar_url'); 
-  }
+
   Future<void> fetchImages() async {
     final postService = PostRepository(); // Repository to handle API calls
     final realUserName = await _getRealUserName(); // Fetch the real username from storage
-final avatar = await _loadAvatar();
     if (realUserName != null) {
       try {
         final imagesResponse = await postService
@@ -365,7 +361,14 @@ final avatar = await _loadAvatar();
 
 
 
-
+  // String? _avatarUrl;
+ Future<void> _loadAvatar() async {
+  String? avatar = await _storage.read(key: 'avatarUrl');
+  print('Loaded avatarUrl: $avatar'); // In ra console để kiểm tra giá trị
+  setState(() {
+    avatarUrl = avatar; // Cập nhật giá trị avatarUrl
+  });
+}
 
   @override
   void initState() {
@@ -375,8 +378,7 @@ final avatar = await _loadAvatar();
     fetchPostCount();
     fetchImages();
     fetchPosts();
-    avatarUrl = _loadAvatar();
-    print(avatarUrl);
+    _loadAvatar();
   }
   void _showImageModal(BuildContext context, String imageUrl) {
     showModalBottomSheet(
@@ -506,34 +508,27 @@ final avatar = await _loadAvatar();
                         ),
                       ),
                       ClipPath(
-  clipper: ProfileImageClipper(),
-  child: FutureBuilder<String?>(
-    future: _loadAvatar(),  // Hàm đọc avatar từ storage
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const CircularProgressIndicator();  // Hiển thị khi đang tải
-      } else if (snapshot.hasError) {
-        return const Icon(Icons.error);  // Hiển thị lỗi nếu có
-      } else if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
-        // Nếu có URL avatar
-        return Image.network(
-          snapshot.data!,  // Dùng URL từ storage
-          width: 180.0,
-          height: 180.0,
-          fit: BoxFit.cover,
-        );
-      } else {
-        // Nếu không có avatar, sử dụng icon person
-        return const Icon(
-          Icons.person,
-          size: 180.0,
-          color: Colors.grey,  // Màu sắc có thể thay đổi
-        );
-      }
-    },
-  ),
-)
-
+                        clipper: ProfileImageClipper(),
+                        child: avatarUrl != null
+                    ? Image.network(
+                        avatarUrl!,
+                        width: 180.0,
+                        height: 180.0,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person, // Icon thay thế
+                            size: 180.0,
+                            color: Colors.grey.shade400,
+                          );
+                        },
+                      )
+                    : Icon(
+                        Icons.person, // Icon thay thế nếu URL là null
+                        size: 180.0,
+                        color: const Color.fromARGB(255, 152, 24, 24),
+                      ),
+                      ),
                     ],
                   ),
                   Text(

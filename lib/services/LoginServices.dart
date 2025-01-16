@@ -69,6 +69,12 @@ Future<Map<String, dynamic>> login(String username, String password) async {
         // await _storage.write(key: 'role', value: roleUser);
         return {'status': 'success', 'token': token, 'userId': userId, 'realuserName': realuserName, 'userName': userName, 'avatarUrl': avatarUrl, 'role': roleUser,   'gender': gender,  // Trả về gender
           'birthday': birthday,};
+      }else if (responseData['login']['message'] ==
+          'Your account has been banned.') {
+        return {
+          'status': 'error',
+          'message': 'Tài khoản của bạn đã bị cấm.'
+        };
       }
     }
     return {'status': 'error', 'message': 'Tài khoản hoặc mật khẩu không chính xác!'};
@@ -317,6 +323,75 @@ Future<Map<String, dynamic>> updateInformation({
       return {
         'status': 'error',
         'message': 'Failed to update information. Status code: ${response.statusCode}',
+      };
+    }
+  } catch (e) {
+    return {'status': 'error', 'message': 'Connection error: $e'};
+  }
+}
+Future<Map<String, dynamic>> banUser(int userId) async {
+  final url = Uri.parse('$_baseUrl/banUser?userId=$userId');
+  final token = await _storage.read(key: 'token');
+
+  if (token == null) {
+    return {'status': 'error', 'message': 'Authentication token not found'};
+  }
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return {
+        'status': 'success',
+        'message': responseData['message'] ?? 'User has been banned',
+      };
+    } else {
+      final errorResponse = json.decode(response.body);
+      return {
+        'status': 'error',
+        'message': errorResponse['message'] ?? 'Failed to ban user',
+      };
+    }
+  } catch (e) {
+    return {'status': 'error', 'message': 'Connection error: $e'};
+  }
+}
+Future<Map<String, dynamic>> unbanUser(int userId) async {
+  final url = Uri.parse('$_baseUrl/unbanUser?userId=$userId');
+  final token = await _storage.read(key: 'token');
+
+  if (token == null) {
+    return {'status': 'error', 'message': 'Authentication token not found'};
+  }
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'userId': userId}),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return {
+        'status': 'success',
+        'message': responseData['message'] ?? 'User has been unbanned',
+      };
+    } else {
+      final errorResponse = json.decode(response.body);
+      return {
+        'status': 'error',
+        'message': errorResponse['message'] ?? 'Failed to unban user',
       };
     }
   } catch (e) {
