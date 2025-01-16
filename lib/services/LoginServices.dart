@@ -96,8 +96,8 @@ Future<Map<String, dynamic>> reLogin(String token) async {
         String realuserName = responseData['relogin']['data']['user']['username'];
         String avatarUrl = responseData['relogin']['data']['user']['avatar_url'] ?? '';
         int role = responseData['relogin']['data']['user']['role']; // Lấy role
-        String gender = responseData['login']['data']['user']['gender'] ?? ''; // Lấy gender
-        String birthday = responseData['login']['data']['user']['birthday'] ?? ''; // Lấy birthday
+        String gender = responseData['relogin']['data']['user']['gender'] ?? ''; // Lấy gender
+        String birthday = responseData['relogin']['data']['user']['birthday'] ?? ''; // Lấy birthday
 
         // Ghi đè dữ liệu mới vào storage
         await _storage.write(key: 'userId', value: userId);
@@ -215,8 +215,8 @@ Future<Map<String, dynamic>> loginWithGoogle() async {
           String userName = responseBody['data']['user']['name'];
           String realuserName = responseBody['data']['user']['username'];
           String avatarUrl = responseBody['data']['user']['avatar_url'] ?? '';
-          String gender = responseBody['login']['data']['user']['gender'] ?? ''; // Lấy gender
-          String birthday = responseBody['login']['data']['user']['birthday'] ?? ''; // Lấy birthday
+          String gender = responseBody['data']['user']['gender'] ?? ''; // Lấy gender
+          String birthday = responseBody['data']['user']['birthday'] ?? ''; // Lấy birthday
 
   
           await _storage.write(key: 'userId', value: userId);
