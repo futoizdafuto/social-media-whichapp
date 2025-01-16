@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 // import 'package:flutter_svg/svg.dart';
 import 'package:socially_app_flutter_ui/config/colors.dart';
@@ -28,6 +29,8 @@ class _PostsState extends State<Posts> {
   late Future<List<Post>> posts;
   late final UserRepository userRepository = UserRepository();
   late Future<List<User>> users;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  String? avatarUrl;
 
   @override
   void initState() {
@@ -36,8 +39,16 @@ class _PostsState extends State<Posts> {
     posts = postRepository
         .fetchPost(); // Khởi tạo biến posts bằng cách gọi hàm fetchPosts().
     // users = userRepository.fetchUser();
+    // Đọc avatarUrl từ storage trong initState
+    _loadAvatar();
   }
-
+  // Hàm để đọc avatar từ storage
+  Future<void> _loadAvatar() async {
+    String? avatar = await _storage.read(key: 'avatarUrl');
+    setState(() {
+      avatarUrl = avatar;
+    });
+  }
   // trạng thái active cho nút like
   bool isActive = false; // Trạng thái của icon
   // Hàm xử lý sự kiện khi chọn Setting
@@ -123,11 +134,16 @@ class _PostsState extends State<Posts> {
             children: [
               Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        "https://192.168.1.9:8443/uploads/bcc02dc3-aa0f-4f96-90ce-04a538364230ava1.jpeg"),
-                    maxRadius: 16.0,
-                  ),
+                  avatarUrl != null
+                  ? CircleAvatar(
+                        backgroundImage: NetworkImage(post.user.avatar_url),
+                        maxRadius: 16.0,
+                      )
+                    : const CircleAvatar(
+                        backgroundColor: Color.fromARGB(255, 255, 255, 255), // Màu nền khi không có avatar
+                        child: Icon(Icons.person, color: Color.fromARGB(255, 121, 121, 121)),
+                        maxRadius: 16.0,
+                      ),
                   const SizedBox(width: 8.0),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
