@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class Verifyotpmailservices {
   //  static const _baseUrl = 'https://192.168.1.8:8443/api/users';
   //  static const _baseUrl = 'https://10.150.105.205:8443/api/users';
-        static const _baseUrl = 'https://192.168.100.228:8443/api/users';
+        static const _baseUrl = 'https://192.168.1.6:8443/api/users';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
  // Hàm xác minh OTP
