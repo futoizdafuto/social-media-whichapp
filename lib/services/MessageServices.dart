@@ -82,4 +82,76 @@ class Messageservices {
     }
   }
 
+  // Phương thức thu hồi tin nhắn
+  Future<Map<String, dynamic>> deleteMessage(int messageId) async {
+    // Lấy token từ FlutterSecureStorage
+    String? token = await _getValidToken();
+    if (token == null) {
+      return {
+        'status': 'error',
+        'message': 'Failed to get valid token. Please log in again.',
+      };
+    }
+
+    String? userId = await _storage.read(key: 'userId');
+     if (userId == null) {
+      throw Exception('Failed to get userId. Please log in again.');
+    }
+
+    // URL cho endpoint xóa tin nhắn
+    final url = Uri.parse('$_baseUrl/messages/$messageId/delete');
+
+    try {
+    // Header của yêu cầu
+    final headers = {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+
+    // Body của yêu cầu
+    final requestBody = jsonEncode({
+      'userId': userId,
+    });
+
+    // Gửi yêu cầu HTTP DELETE
+    final response = await http.delete(
+      url,
+      headers: headers,
+      body: requestBody,
+    );
+
+    print("Response status: ${response.statusCode}");
+    print("Response body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      // Xử lý khi API trả về thành công
+      final responseData = json.decode(response.body);
+      return {
+        'status': 'success',
+        'message': responseData,
+      };
+    } else if (response.statusCode == 403) {
+      return {
+        'status': 'error',
+        'message': 'Forbidden: You are not allowed to delete this message.',
+      };
+    } else if (response.statusCode == 404) {
+      return {
+        'status': 'error',
+        'message': 'Message not found.',
+      };
+    } else {
+      return {
+        'status': 'error',
+        'message': 'HTTP error: ${response.statusCode} - ${response.body}',
+      };
+    }
+  } catch (e) {
+    return {
+      'status': 'error',
+      'message': 'An error occurred: $e',
+    };
+  }
+}
+
 }
