@@ -6,6 +6,7 @@ import 'package:socially_app_flutter_ui/screens/home/widgets/background.dart';
 import 'package:socially_app_flutter_ui/screens/notification/notification_screen.dart';
 import '../../data/models/post/post.dart';
 import '../post_widget/post_widget.dart';
+import 'SearchScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -51,7 +52,14 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 10.0),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SearchScreen(),  // Navigate to SearchScreen
+                    ),
+                  );
+                };
                 icon: SvgPicture.asset('assets/icons/search.svg'),
               ),
             ),
